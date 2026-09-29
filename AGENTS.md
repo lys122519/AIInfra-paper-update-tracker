@@ -24,7 +24,6 @@
   - `requests` – official snapshot discovery/download plus metadata APIs
   - `lxml` – bounded-memory XML parsing with the official local DTD
   - `loguru` – structured logging
-  - `ezkfg` – lightweight config loader
   - `pyyaml` – cache read/write
 - **CI/CD**: GitHub Actions (Ubuntu runner)
 - **License**: Apache 2.0

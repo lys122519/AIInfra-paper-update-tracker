@@ -3,7 +3,6 @@ import os
 import yaml
 from loguru import logger
 from pathlib import Path
-import ezkfg as ez
 import urllib.parse
 import requests
 import json
@@ -74,7 +73,10 @@ def init_path(cfg):
 
 
 def init(cfg_path: str):
-    cfg = ez.Config().load(cfg_path)
+    with open(cfg_path, "r", encoding="utf-8") as config_file:
+        cfg = yaml.safe_load(config_file) or {}
+    if not isinstance(cfg, dict):
+        raise ValueError(f"Configuration root must be a mapping: {cfg_path}")
     cfg = init_path(cfg)
     init_log()
     return cfg

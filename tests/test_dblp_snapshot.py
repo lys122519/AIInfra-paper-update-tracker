@@ -4,15 +4,26 @@ import urllib.parse
 from pathlib import Path
 
 import yaml
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from dblp_snapshot import load_snapshot_items_by_topic, title_matches_keyword  # noqa: E402
+import utils  # noqa: E402
 
 
 class DblpSnapshotTests(unittest.TestCase):
+    def test_runtime_config_loader_preserves_colon_keys(self):
+        with patch.object(utils, "init_path", side_effect=lambda config: config), patch.object(
+            utils, "init_log"
+        ):
+            config = utils.init(str(ROOT / "config.yaml"))
+        mapping = config["dblp"]["snapshot"]["query_key_prefixes"]
+        self.assertEqual(mapping["venue:ACL:"], "conf/acl")
+        self.assertEqual(mapping["streamid:journals/tacl:"], "journals/tacl")
+
     def test_every_configured_query_has_a_key_prefix(self):
         config = yaml.safe_load((ROOT / "config.yaml").read_text(encoding="utf-8"))
         dblp = config["dblp"]

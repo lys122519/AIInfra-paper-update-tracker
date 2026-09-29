@@ -40,6 +40,7 @@ jobs:
         with:
           path: .cache/dblp
           key: ${{ runner.os }}-dblp-${{ steps.snapshot.outputs.release }}
+          save-always: true
 
       - name: Download official DBLP snapshot
         run: python scripts/sync_dblp_snapshot.py

@@ -1,7 +1,6 @@
 fire
 requests
 loguru
-ezkfg
 pyyaml
 python-dotenv
 openai
