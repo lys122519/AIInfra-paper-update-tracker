@@ -45,6 +45,9 @@ You can inspect `topic_new_items` and `msg` in the logs to preview the issue con
 Additional CLI flags:
 - `--primary_only` — Compatibility mode for a single core research theme: the primary keyword scans all venues, then secondary keywords only scan venues where new papers were found. The AI Infra workflow does not use this mode because its keywords represent independent subfields.
 - `--all_years` — Disable the year filter and skip abstract fetching / translation. Useful for backfilling the entire history.
+- `--keyword_limit` / `--query_limit` / `--max_results` — Bound a smoke test to a small number of keywords, venues, and API results.
+- `--dry_run` — Process results without writing cache changes.
+- `--skip_enrichment` — Skip abstract retrieval and translation.
 
 ---
 
@@ -99,15 +102,15 @@ This repository uses [GitHub Actions](.github/workflows/watch.yml) to run the tr
 | Trigger | Description |
 |---------|-------------|
 | **Schedule** | Every day at 00:00 UTC+8 (`cron: 0 0 * * *`) |
-| **Push** | On every push to the `main` branch |
-| **Manual** | Via `workflow_dispatch` in the Actions tab |
+| **Manual** | Via `workflow_dispatch`; `smoke_test` defaults to a read-only one-query check |
 
 ### Execution Steps
 
 1. **Checkout** – Clones the repository.
-2. **Setup Python** – Installs Python 3.8.
+2. **Setup Python** – Installs Python 3.13.
 3. **Install Dependencies** – Runs `pip install -r requirements.txt`.
 4. **Run Tracker** – Executes `src/main.py` with `--env=prod`. It scans every configured `keywords × queries` combination, filters by year, deduplicates by `ee` and title, and updates `cached/dblp.yaml`. Full scanning is required because GPU clusters, inference, Kubernetes, networking, and architecture are complementary rather than secondary aliases of one keyword.
+   - A manual run with `smoke_test=true` instead executes one query, caps DBLP at 10 results, skips enrichment, and does not write the cache. All mutation and notification steps are skipped.
 5. **Extract Related Code** (optional) – Runs `scripts/fetch_related_code.py` to scan abstracts for GitHub repository links and backfill `related_code` fields.
 6. **Fetch Missing Abstracts** (optional) – Runs `scripts/fetch_abstracts.py` to backfill empty `abstract` fields and their Chinese translations for existing papers.
    Both backfill steps ignore inactive legacy cache topics and only process the current configuration.

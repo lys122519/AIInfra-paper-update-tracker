@@ -12,6 +12,7 @@ import yaml
 import datetime
 import urllib.parse
 import os
+import re
 
 # 本地开发时从 .env 加载环境变量
 try:
@@ -26,10 +27,25 @@ class Scaffold:
     def __init__(self):
         pass
 
-    def run(self, env: str = "dev", cfg: str = "./../config.yaml", primary_only: bool = False, all_years: bool = False):
+    def run(
+        self,
+        env: str = "dev",
+        cfg: str = "./../config.yaml",
+        primary_only: bool = False,
+        all_years: bool = False,
+        keyword_limit: int = 0,
+        query_limit: int = 0,
+        max_results: int = 0,
+        dry_run: bool = False,
+        skip_enrichment: bool = False,
+    ):
         cfg = init(cfg_path=cfg)
 
-        logger.info(f"running with env: {env}, primary_only: {primary_only}, all_years: {all_years}, cfg: {cfg}")
+        logger.info(
+            f"running with env: {env}, primary_only: {primary_only}, "
+            f"all_years: {all_years}, dry_run: {dry_run}, "
+            f"skip_enrichment: {skip_enrichment}, cfg: {cfg}"
+        )
 
         # dblp
 
@@ -40,6 +56,8 @@ class Scaffold:
         dblp_new_cache = {}
 
         dblp_url = cfg["dblp"]["url"]
+        if max_results > 0:
+            dblp_url = re.sub(r"([?&]h=)\d+", rf"\g<1>{max_results}", dblp_url)
         # 兼容旧版单 keyword 字符串配置
         keywords = cfg["dblp"].get("keywords")
         if keywords is None:
@@ -58,6 +76,10 @@ class Scaffold:
             raise ValueError("Invalid configuration: `dblp.keywords` (or legacy `dblp.keyword`) must contain at least one non-empty keyword.")
 
         queries = cfg["dblp"]["queries"]
+        if keyword_limit > 0:
+            keywords = keywords[:keyword_limit]
+        if query_limit > 0:
+            queries = queries[:query_limit]
         mails = cfg["dblp"].get("mails", [])
         contact_email = mails[0] if mails else ""
         msg = ""
@@ -143,7 +165,7 @@ class Scaffold:
                 dblp_cache[topic] = []
 
             # 为新增论文自动获取 abstract（all_years 时跳过）
-            if new_items and not all_years:
+            if new_items and not all_years and not skip_enrichment:
                 fetch_abstract_for_papers(new_items, sleep_sec=2.0, max_retries=4, contact_email=contact_email)
                 api_key = os.getenv("DASHSCOPE_API_KEY", "")
                 translate_abstracts_for_papers(new_items, api_key=api_key, sleep_sec=0.5, max_retries=3)
@@ -204,8 +226,11 @@ class Scaffold:
                 for query in queries:
                     _process_topic(keyword, query)
 
-        # save cache
-        yaml.safe_dump(dblp_cache, open(cache_path, "w", encoding="utf-8"), sort_keys=False, indent=2)
+        # save cache unless this is a read-only smoke test
+        if dry_run:
+            logger.info("dry_run enabled: cache changes were not written")
+        else:
+            yaml.safe_dump(dblp_cache, open(cache_path, "w", encoding="utf-8"), sort_keys=False, indent=2)
 
         # 统一生成合并后的消息：同一 venue (name_topic) 的论文合并为一个区块
         for name_topic in topic_order:

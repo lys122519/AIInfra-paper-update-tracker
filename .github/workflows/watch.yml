@@ -2,12 +2,18 @@ name: Run DBLP Watch
 
 on:
   workflow_dispatch:
+    inputs:
+      smoke_test:
+        description: "Run one read-only DBLP query instead of the full tracker"
+        required: true
+        type: boolean
+        default: true
   schedule:
     - cron: '0 0 * * *'
-  push:
-    branches: [main]
 
-permissions: write-all
+permissions:
+  contents: write
+  issues: write
 
 jobs:
   build:
@@ -21,14 +27,14 @@ jobs:
       # TODO [√] 检查工作分支及 Workflows 运行环境
       # ============================================
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       # ============================================
       # TODO [√] 创建 Python3.6+ 编译环境
       # ============================================
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v3
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.8
+          python-version: "3.13"
       # ============================================
       # TODO [√] 安装 Project 第三方依赖
       # ============================================
@@ -39,25 +45,35 @@ jobs:
       # ============================================
       # TODO [√] 测试 Scaffold 脚手架指令
       # ============================================
-      - name: Run dblp watcher
+      - name: Run DBLP smoke test
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.smoke_test }}
+        run: |
+          cd src && python main.py run --env=dev --all_years --keyword_limit=1 --query_limit=1 --max_results=10 --dry_run --skip_enrichment
+
+      - name: Run full DBLP watcher
+        if: ${{ github.event_name != 'workflow_dispatch' || !inputs.smoke_test }}
         run: |
           cd src && python main.py run --env=${{ env.RUN_ENV }}
 
       - name: Extract related code links
+        if: ${{ github.event_name != 'workflow_dispatch' || !inputs.smoke_test }}
         run: |
           python scripts/fetch_related_code.py
         continue-on-error: true
 
       - name: Fetch missing abstracts
+        if: ${{ github.event_name != 'workflow_dispatch' || !inputs.smoke_test }}
         run: |
           python scripts/fetch_abstracts.py
         continue-on-error: true
 
       - name: Update AI Infra paper list
+        if: ${{ github.event_name != 'workflow_dispatch' || !inputs.smoke_test }}
         run: |
           python scripts/convert_cache_to_md.py
 
       - name: Setup var
+        if: ${{ github.event_name != 'workflow_dispatch' || !inputs.smoke_test }}
         id: vars
         run: |
           content=${{ env.MSG }}
@@ -69,17 +85,19 @@ jobs:
       # TODO [√] 更新仓库数据
       # ============================================
       - name: Setup GIT user
+        if: ${{ github.event_name != 'workflow_dispatch' || !inputs.smoke_test }}
         run: |
-          git config --global user.name "youngfish42"
-          git config --global user.email "youngfish42@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Push done work
+        if: ${{ github.event_name != 'workflow_dispatch' || !inputs.smoke_test }}
         run: |
-          git diff --exit-code || git commit -am "Fetch new papers @ $(date '+%Y-%m-%d %H:%M')"
-          git push --force origin main
+          git diff --exit-code || git commit -am "Fetch new papers @ $(date '+%Y-%m-%d %H:%M') [skip ci]"
+          git push origin main
 
       - name: Create an issue for new papers
-        if: ${{ env.MSG != '' }}
+        if: ${{ (github.event_name != 'workflow_dispatch' || !inputs.smoke_test) && env.MSG != '' }}
         uses: JasonEtco/create-an-issue@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

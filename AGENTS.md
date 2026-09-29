@@ -7,7 +7,7 @@
 **FL-paper-update-tracker** has been adapted into an automated GPU cluster and AI Infrastructure paper tracker. It follows AI/ML systems, cloud and operating systems, networking, HPC, computer architecture, and related systems journals. The repository name and generated `FL-Papers.md` filename are retained for compatibility with the original project.
 
 ### High-Level Workflow
-1. GitHub Actions runs the tracker once per day (cron: `0 0 * * *`) and on every push to `main`.
+1. GitHub Actions runs the tracker once per day (cron: `0 0 * * *`) and on manual dispatch. Manual runs default to a read-only smoke test: one keyword, one venue, at most 10 results, and no enrichment, cache write, commit, or Issue. Normal code pushes do not trigger the expensive full scan.
 2. `src/main.py` reads `config.yaml` → takes GPU/AI-Infra `dblp.keywords` and plain venue restrictions from `dblp.queries`, assembles fully URL-encoded DBLP search topics, and queries the DBLP search API. Scheduled runs scan the full keyword × venue matrix.
 3. Extracted paper metadata is **filtered by year** (last 3 years + next 1 year) and **deduplicated by `ee` field**.
 4. New papers (not yet in `cached/dblp.yaml`) are collected, formatted as Markdown, and written to the `GITHUB_ENV` variable `MSG`.
@@ -243,6 +243,8 @@ You can inspect `aggregated_msg` and `msg` in the logs to preview the issue cont
 Additional CLI flags:
 - `--primary_only` — Optional compatibility mode: the first keyword scans all venues and the remaining keywords only scan venues where it found new papers. It is not used by the current automatic workflow.
 - `--all_years` — Disables the year filter and skips abstract fetching / translation (used by the `Fetch All Years Papers` workflow).
+- `--keyword_limit`, `--query_limit`, and `--max_results` — Bound smoke-test scope.
+- `--dry_run` and `--skip_enrichment` — Keep smoke tests read-only and avoid external metadata calls.
 
 ## Common Pitfalls
 
