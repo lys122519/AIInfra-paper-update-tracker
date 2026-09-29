@@ -27,7 +27,7 @@ from collections import defaultdict
 def main():
     repo_root = Path(__file__).resolve().parent.parent
     cache_path = repo_root / "cached" / "dblp.yaml"
-    output_path = repo_root / "FL-Papers.md"
+    output_path = repo_root / "AIInfra-Papers.md"
     config_path = repo_root / "config.yaml"
 
     # Load cache

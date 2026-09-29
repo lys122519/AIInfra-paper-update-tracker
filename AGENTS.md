@@ -1,10 +1,10 @@
-# Agent Guidance for FL-paper-update-tracker
+# Agent Guidance for AIInfra-paper-update-tracker
 
 > This file is intended for automated coding agents (and human maintainers) who need to understand, modify, or extend the project. Keep it up-to-date whenever architecture, logic, or conventions change.
 
 ## Project Overview
 
-**FL-paper-update-tracker** has been adapted into an automated AI Infrastructure paper tracker. It follows AI/ML systems, cloud and operating systems, networking, HPC, computer architecture, and related systems journals. The repository name and generated `FL-Papers.md` filename are retained for compatibility with the original project.
+**AIInfra-paper-update-tracker** is an automated AI Infrastructure paper tracker. It follows AI/ML systems, cloud and operating systems, networking, HPC, computer architecture, and related systems journals.
 
 ### High-Level Workflow
 1. GitHub Actions runs the tracker once per month (cron: `17 1 3 * *`) and on manual dispatch. Manual runs default to a read-only release check plus bundled parser tests; they do not download the large dump or mutate the repository.
@@ -12,9 +12,9 @@
 3. `src/dblp_snapshot.py` streams the gzip XML once and locally filters by year, DBLP record-key prefix, and title keyword. `src/main.py` consumes the resulting URL-encoded topic mapping, preserving the existing cache and Issue format.
 4. Extracted paper metadata is **filtered by year** (last 3 years + next 1 year) and **deduplicated by `ee` field**.
 5. New papers (not yet in `cached/dblp.yaml`) are collected, formatted as Markdown, and written to the `GITHUB_ENV` variable `MSG`.
-6. `scripts/convert_cache_to_md.py` regenerates `FL-Papers.md` from the updated cache.
+6. `scripts/convert_cache_to_md.py` regenerates `AIInfra-Papers.md` from the updated cache.
 7. If new papers exist, the action `JasonEtco/create-an-issue@v2` creates a GitHub Issue using `.github/issue-template.md`.
-8. Both `cached/dblp.yaml` and `FL-Papers.md` are committed back to the repo so that subsequent runs know what has already been reported.
+8. Both `cached/dblp.yaml` and `AIInfra-Papers.md` are committed back to the repo so that subsequent runs know what has already been reported.
 
 ## Tech Stack
 
@@ -50,7 +50,7 @@
 │   ├── dblp_snapshot.py             # DROPS release sync and streaming local XML filtering
 │   └── utils.py                     # Helper functions: API call, parsing, formatting, dedup
 ├── config.yaml                      # keyword, plain queries (venues), and mail targets
-├── FL-Papers.md                     # Structured Markdown output of all tracked papers
+├── AIInfra-Papers.md                # Structured Markdown output of all tracked papers
 ├── requirements.txt                 # Python dependencies
 ├── README.md                        # Human-facing documentation (EN + CN)
 ├── TECHNICAL.md                     # Deployment and configuration guide
@@ -74,7 +74,7 @@
 - **Agent Note**: Do **not** switch back to full-dict comparison (`item not in cached_items`) unless you also normalize author names.
 
 ### 3. Cache Format (`cached/dblp.yaml`)
-- Top-level keys: URL-encoded DBLP search topics (e.g., `federate%20venue%3ADAC%3A:` or `FedAvg%20venue%3AICML%3A:`).
+- Top-level keys: URL-encoded DBLP search topics (e.g., `AI%20infrastructure%20venue%3AMLSys%3A:`).
 - Each key maps to a list of paper dicts with fields: `author`, `title`, `venue`, `year`, `type`, `access`, `key`, `doi`, `ee`, `url`, `abstract`, `abstract_cn`, `related_code`.
   - `abstract`  may be empty for legacy entries; use `scripts/fetch_abstracts.py` to backfill it.
   - `abstract_cn` is the Chinese translation of `abstract`, auto-generated via Qwen-MT-plus.
@@ -135,7 +135,7 @@ dblp:
 ### Adding a New Venue
 1. Find the DBLP venue code and XML record-key prefix (e.g., `venue:ICML:` and `conf/icml`).
 2. Append the query string to `dblp.queries` and the matching prefix to `dblp.snapshot.query_key_prefixes`.
-3. Update `scripts/convert_cache_to_md.py` if you want the new venue mapped to a specific category in `FL-Papers.md`.
+3. Update `scripts/convert_cache_to_md.py` if you want the new venue mapped to a specific category in `AIInfra-Papers.md`.
 4. Update `README.md` (both EN and CN sections) to list the new venue.
 5. Update this `AGENTS.md` if the change affects architecture or conventions.
 
@@ -271,6 +271,5 @@ Additional CLI flags:
 
 ## Contact & References
 
-- Original project: [FL-paper-update-tracker](https://github.com/youngfish42/FL-paper-update-tracker)
 - Upstream inspiration: [dblp-watcher](https://github.com/beiyuouo/dblp-watcher/)
 - Official DBLP XML releases: https://drops.dagstuhl.de/entities/collection/10.4230/dblp.xml
