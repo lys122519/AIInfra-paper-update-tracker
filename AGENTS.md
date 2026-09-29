@@ -4,7 +4,7 @@
 
 ## Project Overview
 
-**AIInfra-paper-update-tracker** is an automated AI Infrastructure paper tracker. It follows AI/ML systems, cloud and operating systems, networking, HPC, computer architecture, and related systems journals.
+**AIInfra-paper-update-tracker** is an automated AI Infrastructure paper tracker. It follows AI/ML systems, NLP and language models, retrieval, multimodal learning, cloud and operating systems, networking, HPC, computer architecture, and related journals.
 
 ### High-Level Workflow
 1. GitHub Actions runs the tracker once per month (cron: `17 1 3 * *`) and on manual dispatch. Manual runs default to a read-only release check plus bundled parser tests; they do not download the large dump or mutate the repository.

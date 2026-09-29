@@ -20,6 +20,7 @@ Quick checklist when switching domains:
 
 import yaml
 import urllib.parse
+import re
 from pathlib import Path
 from collections import defaultdict
 
@@ -65,6 +66,22 @@ def main():
         "IEEE Trans. Parallel Distrib. Syst.": "TPDS",
         "IEEE Trans. Parallel Distributed Syst.": "TPDS",
         "ACM Trans. Comput. Syst.": "TOCS",
+        "Trans. Assoc. Comput. Linguistics": "TACL",
+        "Transactions of the Association for Computational Linguistics": "TACL",
+        "Comput. Linguistics": "Computational Linguistics",
+        "Computational Linguistics": "Computational Linguistics",
+        "J. Mach. Learn. Res.": "JMLR",
+        "Journal of Machine Learning Research": "JMLR",
+        "IEEE Trans. Pattern Anal. Mach. Intell.": "TPAMI",
+        "IEEE Transactions on Pattern Analysis and Machine Intelligence": "TPAMI",
+        "ACM Trans. Inf. Syst.": "TOIS",
+        "ACM Transactions on Information Systems": "TOIS",
+        "IEEE Trans. Neural Networks Learn. Syst.": "TNNLS",
+        "IEEE Transactions on Neural Networks and Learning Systems": "TNNLS",
+        "Artif. Intell.": "AIJ",
+        "Artificial Intelligence": "AIJ",
+        "IEEE Trans. Knowl. Data Eng.": "TKDE",
+        "IEEE Transactions on Knowledge and Data Engineering": "TKDE",
         # Conference aliases and co-located tracks
         "USENIX Annual Technical Conference": "USENIX ATC",
         "USENIX ATC": "USENIX ATC",
@@ -74,6 +91,15 @@ def main():
         "EdgeSys@EuroSys": "EuroSys",
         "EuroMLSys@EuroSys": "EuroSys",
         "Supercomputing": "SC",
+        "The Web Conference": "WWW",
+        "Web Conference": "WWW",
+    }
+
+    VENUE_FAMILY_PATTERNS = {
+        r"^ACL(?: \(\d+\))?$": "ACL",
+        r"^NAACL(?:-HLT)?(?: \(\d+\))?$": "NAACL",
+        r"^COLING(?: \(\d+\))?$": "COLING",
+        r"^ECCV(?: \(\d+\))?$": "ECCV",
     }
 
     # Display name -> category
@@ -82,6 +108,27 @@ def main():
         "NeurIPS": "AI / ML Systems",
         "ICML": "AI / ML Systems",
         "ICLR": "AI / ML Systems",
+        "AAAI": "AI / ML Systems",
+        "IJCAI": "AI / ML Systems",
+        "ACL": "NLP & Language Models",
+        "EMNLP": "NLP & Language Models",
+        "NAACL": "NLP & Language Models",
+        "EACL": "NLP & Language Models",
+        "COLING": "NLP & Language Models",
+        "TACL": "NLP & Language Models",
+        "Computational Linguistics": "NLP & Language Models",
+        "KDD": "Data, Search & Web",
+        "SIGIR": "Data, Search & Web",
+        "WWW": "Data, Search & Web",
+        "TOIS": "Data, Search & Web",
+        "TKDE": "Data, Search & Web",
+        "CVPR": "Multimodal & Vision",
+        "ICCV": "Multimodal & Vision",
+        "ECCV": "Multimodal & Vision",
+        "TPAMI": "Multimodal & Vision",
+        "JMLR": "ML & AI Journals",
+        "TNNLS": "ML & AI Journals",
+        "AIJ": "ML & AI Journals",
         "OSDI": "Cloud & Operating Systems",
         "SOSP": "Cloud & Operating Systems",
         "EuroSys": "Cloud & Operating Systems",
@@ -102,6 +149,10 @@ def main():
 
     CATEGORY_ORDER = [
         "AI / ML Systems",
+        "NLP & Language Models",
+        "Data, Search & Web",
+        "Multimodal & Vision",
+        "ML & AI Journals",
         "Cloud & Operating Systems",
         "Networking & Communication",
         "High-Performance Computing",
@@ -111,7 +162,11 @@ def main():
 
     # Venue display order within each category (as specified by user)
     VENUE_ORDER = {
-        "AI / ML Systems": ["MLSys", "NeurIPS", "ICML", "ICLR"],
+        "AI / ML Systems": ["MLSys", "NeurIPS", "ICML", "ICLR", "AAAI", "IJCAI"],
+        "NLP & Language Models": ["ACL", "EMNLP", "NAACL", "EACL", "COLING", "TACL", "Computational Linguistics"],
+        "Data, Search & Web": ["KDD", "SIGIR", "WWW", "TOIS", "TKDE"],
+        "Multimodal & Vision": ["CVPR", "ICCV", "ECCV", "TPAMI"],
+        "ML & AI Journals": ["JMLR", "TNNLS", "AIJ"],
         "Cloud & Operating Systems": ["OSDI", "SOSP", "EuroSys", "USENIX ATC", "SoCC", "Middleware"],
         "Networking & Communication": ["NSDI", "SIGCOMM"],
         "High-Performance Computing": ["SC", "HPDC"],
@@ -134,6 +189,11 @@ def main():
                 continue
 
             venue = VENUE_MAP.get(raw_venue, raw_venue)
+            if venue == raw_venue:
+                for pattern, display_name in VENUE_FAMILY_PATTERNS.items():
+                    if re.fullmatch(pattern, raw_venue):
+                        venue = display_name
+                        break
             category = CATEGORY_MAP.get(venue)
 
             if category is None:

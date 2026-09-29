@@ -11,6 +11,22 @@ dblp:
       "venue:NeurIPS:": conf/nips
       "venue:ICML:": conf/icml
       "venue:ICLR:": conf/iclr
+      "venue:AAAI:": conf/aaai
+      "venue:IJCAI:": conf/ijcai
+      # NLP and language models
+      "venue:ACL:": conf/acl
+      "venue:EMNLP:": conf/emnlp
+      "venue:NAACL:": conf/naacl
+      "venue:EACL:": conf/eacl
+      "venue:COLING:": conf/coling
+      # Data, retrieval, and web
+      "venue:KDD:": conf/kdd
+      "venue:SIGIR:": conf/sigir
+      "venue:WWW:": conf/www
+      # Multimodal and vision-language models
+      "venue:CVPR:": conf/cvpr
+      "venue:ICCV:": conf/iccv
+      "venue:ECCV:": conf/eccv
       "venue:OSDI:": conf/osdi
       "venue:SOSP:": conf/sosp
       "streamid:conf/eurosys:": conf/eurosys
@@ -27,6 +43,15 @@ dblp:
       "venue:HPCA:": conf/hpca
       "streamid:journals/tocs:": journals/tocs
       "streamid:journals/tpds:": journals/tpds
+      # Language, ML, multimodal, and retrieval journals
+      "streamid:journals/tacl:": journals/tacl
+      "streamid:journals/coling:": journals/coling
+      "streamid:journals/jmlr:": journals/jmlr
+      "streamid:journals/pami:": journals/pami
+      "streamid:journals/tois:": journals/tois
+      "streamid:journals/tnn:": journals/tnn
+      "streamid:journals/ai:": journals/ai
+      "streamid:journals/tkde:": journals/tkde
   keywords:
     # AI infrastructure and resource management
     - AI infrastructure
@@ -41,6 +66,17 @@ dblp:
     - LLM inference
     - model serving
     - inference serving
+    # LLM systems and efficiency
+    - LLM training
+    - LLM serving
+    - LLM system
+    - efficient language model
+    - model compression
+    - quantization
+    - speculative decod
+    - KV cache
+    - mixture of experts
+    - long context
     # Communication and orchestration
     - collective communication
     - RDMA
@@ -53,6 +89,22 @@ dblp:
     - "venue:NeurIPS:"
     - "venue:ICML:"
     - "venue:ICLR:"
+    - "venue:AAAI:"
+    - "venue:IJCAI:"
+    # NLP and language models
+    - "venue:ACL:"
+    - "venue:EMNLP:"
+    - "venue:NAACL:"
+    - "venue:EACL:"
+    - "venue:COLING:"
+    # Data, retrieval, and web
+    - "venue:KDD:"
+    - "venue:SIGIR:"
+    - "venue:WWW:"
+    # Multimodal and vision-language models
+    - "venue:CVPR:"
+    - "venue:ICCV:"
+    - "venue:ECCV:"
     # Operating systems, cloud, and distributed systems
     - "venue:OSDI:"
     - "venue:SOSP:"
@@ -74,5 +126,14 @@ dblp:
     # Systems journals
     - "streamid:journals/tocs:"
     - "streamid:journals/tpds:"
+    # Language and machine learning journals
+    - "streamid:journals/tacl:"
+    - "streamid:journals/coling:"
+    - "streamid:journals/jmlr:"
+    - "streamid:journals/pami:"
+    - "streamid:journals/tois:"
+    - "streamid:journals/tnn:"
+    - "streamid:journals/ai:"
+    - "streamid:journals/tkde:"
   mails:
     - "im.young@foxmail.com"

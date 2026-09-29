@@ -13,7 +13,7 @@ An automated DBLP paper tracker for AI infrastructure. It follows the complete s
 
 ## Features
 
-- Reads DBLP's official monthly XML snapshot and filters a curated set of AI-systems, operating-systems, cloud, networking, HPC, and architecture venues locally
+- Reads DBLP's official monthly XML snapshot and filters a curated set of AI/ML, NLP, retrieval, multimodal, systems, networking, HPC, and architecture venues locally
 - Keeps papers from the last three years through the next year
 - Deduplicates records by publication URL and title, including across search topics
 - Fetches abstracts and DOI metadata, extracts GitHub repository links, and optionally translates abstracts into Chinese with Qwen-MT-plus
@@ -22,14 +22,18 @@ An automated DBLP paper tracker for AI infrastructure. It follows the complete s
 
 ## Tracked Venues
 
-- **AI / ML Systems:** MLSys, NeurIPS, ICML, ICLR
+- **AI / ML Systems:** MLSys, NeurIPS, ICML, ICLR, AAAI, IJCAI
+- **NLP & Language Models:** ACL, EMNLP, NAACL, EACL, COLING, TACL, Computational Linguistics
+- **Data, Search & Web:** KDD, SIGIR, WWW, ACM TOIS, IEEE TKDE
+- **Multimodal & Vision:** CVPR, ICCV, ECCV, IEEE TPAMI
+- **ML & AI Journals:** JMLR, IEEE TNNLS, Artificial Intelligence
 - **Cloud & Operating Systems:** OSDI, SOSP, EuroSys, USENIX ATC, SoCC, Middleware
 - **Networking & Communication:** NSDI, SIGCOMM
 - **High-Performance Computing:** SC, HPDC
 - **Architecture & Accelerators:** ASPLOS, ISCA, MICRO, HPCA
 - **Systems Journals:** ACM TOCS, IEEE TPDS
 
-The keywords and venue restrictions live in [`config.yaml`](config.yaml). The current keywords cover compute-resource management, distributed/parallel training, inference serving, collective communication, RDMA, Kubernetes, and tensor/pipeline parallelism.
+The keywords and venue restrictions live in [`config.yaml`](config.yaml). The current keywords cover compute-resource management, distributed/parallel training, LLM serving and efficiency, model compression, quantization, speculative decoding, KV-cache management, mixture-of-experts, collective communication, RDMA, Kubernetes, and model parallelism.
 
 ## Run Locally
 
@@ -67,7 +71,7 @@ For deployment, configuration, and maintenance details, see [`TECHNICAL.md`](TEC
 
 ## 主要能力
 
-- 使用 DBLP 官方月度 XML 快照，在本地筛选 AI 系统、操作系统、云计算、网络、HPC 和体系结构领域的精选 venue
+- 使用 DBLP 官方月度 XML 快照，在本地筛选 AI/ML、NLP、检索、多模态、系统、网络、HPC 和体系结构领域的精选 venue
 - 仅保留近三年至未来一年的论文
 - 按论文链接和标题去重，并支持跨检索主题的全局去重
 - 自动补充摘要和 DOI、提取 GitHub 代码链接，并可通过 Qwen-MT-plus 翻译中文摘要
@@ -76,14 +80,18 @@ For deployment, configuration, and maintenance details, see [`TECHNICAL.md`](TEC
 
 ## 追踪会议与期刊
 
-- **AI / ML 系统：** MLSys、NeurIPS、ICML、ICLR
+- **AI / ML 系统：** MLSys、NeurIPS、ICML、ICLR、AAAI、IJCAI
+- **NLP 与语言模型：** ACL、EMNLP、NAACL、EACL、COLING、TACL、Computational Linguistics
+- **数据、检索与 Web：** KDD、SIGIR、WWW、ACM TOIS、IEEE TKDE
+- **多模态与视觉：** CVPR、ICCV、ECCV、IEEE TPAMI
+- **机器学习与 AI 期刊：** JMLR、IEEE TNNLS、Artificial Intelligence
 - **云与操作系统：** OSDI、SOSP、EuroSys、USENIX ATC、SoCC、Middleware
 - **网络与通信：** NSDI、SIGCOMM
 - **高性能计算：** SC、HPDC
 - **体系结构与加速器：** ASPLOS、ISCA、MICRO、HPCA
 - **系统期刊：** ACM TOCS、IEEE TPDS
 
-关键词和 venue 限制位于 [`config.yaml`](config.yaml)。当前关键词覆盖算力资源管理、分布式/并行训练、推理服务、集合通信、RDMA、Kubernetes，以及张量/流水线并行。
+关键词和 venue 限制位于 [`config.yaml`](config.yaml)。当前关键词覆盖算力资源管理、分布式/并行训练、LLM 服务与效率、模型压缩、量化、投机解码、KV Cache、MoE、集合通信、RDMA、Kubernetes 和模型并行。
 
 ## 本地运行
 

@@ -18,6 +18,13 @@
 | 推理 | `LLM inference` | 大模型推理架构与性能 |
 | 推理 | `model serving` | 在线模型服务与调度 |
 | 推理 | `inference serving` | 推理服务系统与性能优化 |
+| LLM 系统 | `LLM training` / `LLM serving` / `LLM system` | 大模型训练、服务和端到端系统 |
+| LLM 效率 | `efficient language model` | 高效语言模型设计与运行 |
+| 模型优化 | `model compression` / `quantization` | 压缩、低精度表示与部署优化 |
+| 解码优化 | `speculative decod` | 投机解码及其运行时优化 |
+| 推理内存 | `KV cache` | KV Cache 管理、复用与卸载 |
+| 稀疏模型 | `mixture of experts` | MoE 路由、并行与通信优化 |
+| 长上下文 | `long context` | 长上下文训练、推理和内存优化 |
 | 网络 | `collective communication` | AllReduce、集合通信库与拓扑优化 |
 | 网络 | `RDMA` | 远程直接内存访问与高速互连 |
 | 编排 | `Kubernetes` | AI 工作负载的容器编排与资源管理 |
@@ -29,6 +36,11 @@
 ## Venue 选择原则
 
 - MLSys、NeurIPS、ICML、ICLR：训练、推理和 ML 系统
+- AAAI、IJCAI：可扩展 ML、硬件感知学习与通用 AI 系统
+- ACL、EMNLP、NAACL、EACL、COLING、TACL、Computational Linguistics：语言模型、LLM 效率与 NLP 系统
+- KDD、SIGIR、WWW、TOIS、TKDE：数据系统、检索、RAG 与 Web 规模应用
+- CVPR、ICCV、ECCV、TPAMI：多模态、视觉语言模型与高效视觉推理
+- JMLR、TNNLS、Artificial Intelligence：机器学习方法、模型效率与通用 AI
 - OSDI、SOSP、EuroSys、USENIX ATC、SoCC、Middleware：操作系统、云平台、调度和 Kubernetes
 - NSDI、SIGCOMM：数据中心网络、RDMA 和集合通信
 - SC、HPDC：大规模算力基础设施与高性能计算
