@@ -5,3 +5,4 @@ ezkfg
 pyyaml
 python-dotenv
 openai
+lxml

@@ -1,5 +1,32 @@
 dblp:
+  # Use DBLP's official monthly XML release instead of the interactive search API.
+  source: snapshot
   url: https://dblp.org/search/publ/api?q={}&format=json&h=1000
+  snapshot:
+    path: .cache/dblp/dblp.xml.gz
+    dtd_path: .cache/dblp/dblp.dtd
+    # Local XML records are assigned to venues by their stable DBLP key prefix.
+    query_key_prefixes:
+      "venue:MLSys:": conf/mlsys
+      "venue:NeurIPS:": conf/nips
+      "venue:ICML:": conf/icml
+      "venue:ICLR:": conf/iclr
+      "venue:OSDI:": conf/osdi
+      "venue:SOSP:": conf/sosp
+      "streamid:conf/eurosys:": conf/eurosys
+      "streamid:conf/usenix:": conf/usenix
+      "streamid:conf/cloud:": conf/cloud
+      "venue:Middleware:": conf/middleware
+      "venue:NSDI:": conf/nsdi
+      "venue:SIGCOMM:": conf/sigcomm
+      "streamid:conf/sc:": conf/sc
+      "venue:HPDC:": conf/hpdc
+      "venue:ASPLOS:": conf/asplos
+      "venue:ISCA:": conf/isca
+      "venue:MICRO:": conf/micro
+      "venue:HPCA:": conf/hpca
+      "streamid:journals/tocs:": journals/tocs
+      "streamid:journals/tpds:": journals/tpds
   keywords:
     # GPU clusters and resource management
     - GPU cluster

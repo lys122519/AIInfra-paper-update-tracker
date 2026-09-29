@@ -1,6 +1,6 @@
 # GPU 集群与 AI Infrastructure 检索词设计
 
-本文档说明 `config.yaml` 中检索词的覆盖范围。DBLP 主要按标题检索，因此关键词应使用论文标题中常见、可辨识的技术表达，避免仅使用 `system`、`performance`、`network` 等高噪声单词。
+本文档说明 `config.yaml` 中检索词的覆盖范围。程序在官方 DBLP XML 快照中对标题进行本地匹配，因此关键词应使用论文标题中常见、可辨识的技术表达，避免仅使用 `system`、`performance`、`network` 等高噪声单词。
 
 ## 检索主题
 
@@ -23,7 +23,7 @@
 | 并行 | `tensor parallel` | 张量并行、通信与执行计划 |
 | 并行 | `pipeline parallel` | 流水线并行、切分与调度 |
 
-`schedul` 有意使用词干形式，以匹配 `schedule`、`scheduler` 和 `scheduling`。每个多词主题保持为独立查询，不合并为复杂 OR 表达式，避免 DBLP 对低频多词分支的召回不稳定。
+`schedul` 有意使用词干形式，以匹配 `schedule`、`scheduler` 和 `scheduling`。本地匹配要求关键词中的每个词都能作为某个标题词的前缀；多词主题中的词不要求相邻。
 
 ## Venue 选择原则
 

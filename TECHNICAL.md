@@ -22,9 +22,10 @@
 ### Installation
 
 ```bash
-git clone https://github.com/youngfish42/FL-paper-update-tracker.git
-cd FL-paper-update-tracker
+git clone https://github.com/lys122519/AIInfra-paper-update-tracker.git
+cd AIInfra-paper-update-tracker
 pip install -r requirements.txt
+python scripts/sync_dblp_snapshot.py
 ```
 
 ### Local Run
@@ -36,7 +37,7 @@ python main.py run --env=dev
 
 In `dev` mode the script will:
 - Load the cache from `cached/dblp.yaml`
-- Query DBLP for all configured `keywords × queries` combinations
+- Stream the local official DBLP XML snapshot once for all configured `keywords × queries` combinations
 - Print logs to stdout
 - **Not** write to `GITHUB_ENV`
 
@@ -45,10 +46,10 @@ You can inspect `topic_new_items` and `msg` in the logs to preview the issue con
 Additional CLI flags:
 - `--primary_only` — Compatibility mode for a single core research theme: the primary keyword scans all venues, then secondary keywords only scan venues where new papers were found. The AI Infra workflow does not use this mode because its keywords represent independent subfields.
 - `--all_years` — Disable the year filter and skip abstract fetching / translation. Useful for backfilling the entire history.
-- `--keyword_limit` / `--query_limit` / `--max_results` — Bound a smoke test to a small number of keywords, venues, and API results.
+- `--keyword_limit` / `--query_limit` / `--max_results` — Bound local snapshot processing to a small number of keywords, venues, and results per topic.
 - `--dry_run` — Process results without writing cache changes.
 - `--skip_enrichment` — Skip abstract retrieval and translation.
-- `--fail_on_request_error` — Exit non-zero when DBLP cannot be reached; intended for CI smoke tests.
+- `--fail_on_request_error` — Legacy API-mode option that exits non-zero after a request failure.
 
 ---
 
@@ -58,6 +59,13 @@ All behavior is controlled by `config.yaml` in the project root.
 
 ```yaml
 dblp:
+  source: snapshot
+  snapshot:
+    path: .cache/dblp/dblp.xml.gz
+    dtd_path: .cache/dblp/dblp.dtd
+    query_key_prefixes:
+      "venue:MLSys:": conf/mlsys
+      "streamid:conf/sc:": conf/sc
   url: https://dblp.org/search/publ/api?q={}&format=json&h=1000
   keywords:
     - GPU cluster
@@ -78,15 +86,18 @@ dblp:
 
 | Field | Description |
 |-------|-------------|
-| `dblp.url` | DBLP search API endpoint. `{}` is replaced by the fully-encoded topic query. `h=1000` requests up to 1000 hits. |
+| `dblp.source` | `snapshot` (default) reads the official monthly dump. `api` remains as a legacy compatibility mode for small workloads. |
+| `dblp.snapshot.path` / `dtd_path` | Local files created by `scripts/sync_dblp_snapshot.py`; both live under the ignored `.cache/` directory. |
+| `dblp.snapshot.query_key_prefixes` | Maps each configured query label to a stable DBLP record-key prefix, such as `venue:MLSys:` → `conf/mlsys`. |
+| `dblp.url` | Legacy search API endpoint; used only when `dblp.source: api`. |
 | `dblp.keywords` | List of independent title-search expressions for GPU clusters and AI infrastructure. Normal and scheduled runs scan all keyword/venue combinations. The first item only has special meaning when `--primary_only` is explicitly enabled. |
-| `dblp.queries` | List of plain-text DBLP venue restrictions. The runner automatically URL-encodes each query and prepends the encoded keyword before calling the API. |
+| `dblp.queries` | List of plain-text venue labels. The runner combines them with keywords only to preserve the existing encoded cache keys and display links. |
 | `dblp.mails` | The first address is used as the Crossref API contact email. Additional addresses are reserved for future mail-notification features. |
 
 ### Adding a New Venue
 
-1. Find the DBLP venue code (e.g., `venue:ICML` or `streamid:journals/pami`).
-2. Append the plain query string to `dblp.queries`. For example:
+1. Find the DBLP venue code and record-key prefix (for example `venue:ICML:` and `conf/icml`).
+2. Append the plain query string to `dblp.queries` and add the same query to `dblp.snapshot.query_key_prefixes`.
    - `venue:ICML:`
    - `streamid:journals/pami:`
 3. Update `scripts/convert_cache_to_md.py` if you want the new venue to appear under a specific category in `FL-Papers.md`.
@@ -102,23 +113,23 @@ This repository uses [GitHub Actions](.github/workflows/watch.yml) to run the tr
 
 | Trigger | Description |
 |---------|-------------|
-| **Schedule** | Every day at 00:00 UTC+8 (`cron: 0 0 * * *`) |
-| **Manual** | Via `workflow_dispatch`; `smoke_test` defaults to a read-only one-query check |
+| **Schedule** | Monthly on day 3 at 01:17 UTC (`cron: 17 1 3 * *`) |
+| **Manual** | Via `workflow_dispatch`; `smoke_test` defaults to release discovery plus local parser tests |
 
 ### Execution Steps
 
 1. **Checkout** – Clones the repository.
 2. **Setup Python** – Installs Python 3.13.
 3. **Install Dependencies** – Runs `pip install -r requirements.txt`.
-4. **Run Tracker** – Executes `src/main.py` with `--env=prod`. It scans every configured `keywords × queries` combination, filters by year, deduplicates by `ee` and title, and updates `cached/dblp.yaml`. Full scanning is required because GPU clusters, inference, Kubernetes, networking, and architecture are complementary rather than secondary aliases of one keyword.
-   - A manual run with `smoke_test=true` instead executes one query, caps DBLP at 10 results, skips enrichment, and does not write the cache. All mutation and notification steps are skipped.
-5. **Extract Related Code** (optional) – Runs `scripts/fetch_related_code.py` to scan abstracts for GitHub repository links and backfill `related_code` fields.
-6. **Fetch Missing Abstracts** (optional) – Runs `scripts/fetch_abstracts.py` to backfill empty `abstract` fields and their Chinese translations for existing papers.
+4. **Discover Snapshot** – Resolves the newest release from the official DROPS collection and validates its download URL with HEAD.
+5. **Restore / Download Snapshot** – Reuses an Actions cache keyed by the exact release date, or downloads the gzip dump, verifies its publisher MD5, and downloads the official DTD.
+6. **Run Tracker** – Streams the XML once, filters records by key prefix, year, and title keywords, then deduplicates and updates `cached/dblp.yaml`.
+   - A manual run with `smoke_test=true` stops after release discovery and bundled parser tests. All large downloads, mutations, and notifications are skipped.
+7. **Extract Related Code** (optional) – Runs `scripts/fetch_related_code.py` to scan abstracts for GitHub repository links and backfill `related_code` fields.
+8. **Fetch Missing Abstracts** (optional) – Runs `scripts/fetch_abstracts.py` to backfill empty `abstract` fields and their Chinese translations for existing papers.
    Both backfill steps ignore inactive legacy cache topics and only process the current configuration.
-7. **Update FL-Papers.md** – Runs `scripts/convert_cache_to_md.py` to regenerate the categorized Markdown paper list from the updated cache.
-8. **Setup Var** – Escapes the generated Markdown message for GitHub Actions.
-9. **Push Done Work** – Commits `cached/dblp.yaml` and `FL-Papers.md` back to the `main` branch.
-10. **Create Issue** – If new papers were found, opens a GitHub Issue using `.github/issue-template.md`.
+9. **Update FL-Papers.md** – Runs `scripts/convert_cache_to_md.py` to regenerate the categorized Markdown paper list from the updated cache.
+10. **Push / Create Issue** – Commits generated data and opens an Issue when new papers exist.
 
 ### Issue Format
 
@@ -150,10 +161,12 @@ The issue body contains:
 │   ├── fetch_abstracts.py     # Backfill/refresh paper abstracts
 │   ├── fetch_dois.py          # Backfill missing DOIs
 │   ├── fetch_related_code.py  # Backfill GitHub links from abstracts
+│   ├── sync_dblp_snapshot.py  # Discover/download/check official DBLP dump
 │   ├── dedup_cache_by_title.py# One-off deduplication by title
 │   └── dedup_cache_global.py  # One-off global cross-topic deduplication
 ├── src/
 │   ├── main.py                # Entry point and orchestration
+│   ├── dblp_snapshot.py       # DROPS sync metadata and streaming XML parser
 │   └── utils.py               # API calls, parsing, formatting, dedup logic
 ├── config.yaml                # Venue list and settings
 ├── FL-Papers.md               # Structured Markdown output of tracked papers
@@ -165,7 +178,8 @@ The issue body contains:
 
 ### Key Modules
 
-- **`src/main.py`** – Loads cache, iterates over topics, queries DBLP, filters by year, performs three-stage deduplication (by `ee`, by `title`, and global cross-topic), fetches abstracts and translations for new papers, extracts related code links, and writes new papers to `GITHUB_ENV`.
+- **`src/main.py`** – Loads cache and one locally parsed snapshot result, then performs three-stage deduplication, enrichment, notification formatting, and cache updates.
+- **`src/dblp_snapshot.py`** – Discovers official DROPS releases, verifies downloads, and stream-parses gzip XML with its local DTD while keeping memory bounded.
 - **`src/utils.py`** – Contains `get_dblp_items` (JSON parsing), `deduplicate_items_by_ee` / `deduplicate_items_by_title` (two-stage dedup logic), `filter_items_by_year` (year window filter), `get_msg` (Markdown formatting), `fetch_abstract_for_papers` (abstract retrieval from Crossref / Semantic Scholar / arXiv / OpenAlex), `translate_abstracts_for_papers` (Chinese translation via Qwen-MT-plus), `extract_github_links` (code link extraction), `fetch_doi_for_papers` (DOI backfill), and helpers for topic short-name extraction.
 - **`cached/dblp.yaml`** – YAML mapping of topic → list of paper dicts. Legacy topics may remain in this file after a domain switch, but only topics generated by the current configuration participate in deduplication and Markdown output.
 - **`scripts/convert_cache_to_md.py`** – Regenerates `FL-Papers.md` from the cache using domain-specific venue and category maps.
@@ -194,7 +208,7 @@ Edit `.github/workflows/watch.yml`:
 
 ```yaml
 schedule:
-  - cron: '0 0 * * *'  # Change this cron expression
+  - cron: '17 1 3 * *'  # Change this cron expression
 ```
 
 ### Backfill Abstracts

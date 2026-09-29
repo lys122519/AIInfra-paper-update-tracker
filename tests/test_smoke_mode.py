@@ -31,6 +31,7 @@ class SmokeModeTests(unittest.TestCase):
         config = {
             "cache_path": ROOT / "tests" / "_unused_cache",
             "dblp": {
+                "source": "api",
                 "url": "https://dblp.org/search/publ/api?q={}&format=json&h=1000",
                 "keywords": ["GPU cluster"],
                 "queries": ["venue:MLSys:"],

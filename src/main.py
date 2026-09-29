@@ -8,11 +8,13 @@ from utils import (
     translate_abstracts_for_papers,
     get_configured_topics,
 )
+from dblp_snapshot import load_snapshot_items_by_topic
 import yaml
 import datetime
 import urllib.parse
 import os
 import re
+from pathlib import Path
 
 # 本地开发时从 .env 加载环境变量
 try:
@@ -56,7 +58,8 @@ class Scaffold:
         # logger.info(f"dblp cache: {dblp_cache}")
         dblp_new_cache = {}
 
-        dblp_url = cfg["dblp"]["url"]
+        dblp_source = cfg["dblp"].get("source", "snapshot")
+        dblp_url = cfg["dblp"].get("url", "")
         if max_results > 0:
             dblp_url = re.sub(r"([?&]h=)\d+", rf"\g<1>{max_results}", dblp_url)
         # 兼容旧版单 keyword 字符串配置
@@ -95,6 +98,31 @@ class Scaffold:
 
         logger.info(f"keywords: {keywords}, queries: {queries}")
 
+        snapshot_items_by_topic = None
+        if dblp_source == "snapshot":
+            snapshot_cfg = cfg["dblp"].get("snapshot", {})
+            project_root = Path(__file__).resolve().parents[1]
+            snapshot_path = project_root / snapshot_cfg.get("path", ".cache/dblp/dblp.xml.gz")
+            dtd_path = project_root / snapshot_cfg.get("dtd_path", ".cache/dblp/dblp.dtd")
+            if not snapshot_path.exists() or not dtd_path.exists():
+                raise FileNotFoundError(
+                    "DBLP snapshot is missing. Run `python scripts/sync_dblp_snapshot.py` "
+                    "from the project root first."
+                )
+            current_year = datetime.datetime.now().year
+            snapshot_items_by_topic = load_snapshot_items_by_topic(
+                snapshot_path=snapshot_path,
+                dtd_path=dtd_path,
+                keywords=keywords,
+                queries=queries,
+                query_key_prefixes=dict(snapshot_cfg.get("query_key_prefixes", {})),
+                min_year=None if all_years else current_year - 3,
+                max_year=None if all_years else current_year + 1,
+                max_results=max_results,
+            )
+        elif dblp_source != "api":
+            raise ValueError("Invalid `dblp.source`: expected `snapshot` or `api`")
+
         # 全局去重集合：只读取当前配置对应的 topic。这样切换研究领域时可以保留
         # 旧缓存用于回退，同时避免旧领域论文阻止新领域中的同一篇论文被收录。
         configured_topics = get_configured_topics(cfg)
@@ -117,17 +145,17 @@ class Scaffold:
             encoded_keyword = urllib.parse.quote(keyword, safe='')
             encoded_query = urllib.parse.quote(query, safe='')
             topic = f"{encoded_keyword}%20{encoded_query}"
-            # random sleep to avoid being blocked
-            dblp_data = request_data(dblp_url.format(topic))
-
-            if dblp_data is None:
-                logger.error(f"dblp_data is None, topic: {topic}")
-                if fail_on_request_error:
-                    raise RuntimeError(f"DBLP request failed for smoke-test topic: {topic}")
-                return 0
-
-            # 解析 DBLP 返回的原始数据，提取需要的字段
-            items = get_dblp_items(dblp_data)
+            if dblp_source == "snapshot":
+                items = list(snapshot_items_by_topic.get(topic, []))
+            else:
+                # Legacy compatibility mode for small API workloads.
+                dblp_data = request_data(dblp_url.format(topic))
+                if dblp_data is None:
+                    logger.error(f"dblp_data is None, topic: {topic}")
+                    if fail_on_request_error:
+                        raise RuntimeError(f"DBLP request failed for smoke-test topic: {topic}")
+                    return 0
+                items = get_dblp_items(dblp_data)
             # logger.info(f"items: {items}")
 
             # 按年份过滤，仅保留近三年及未来一年的论文（如 2026 年则保留 2023-2027）

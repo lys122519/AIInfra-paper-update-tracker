@@ -7,20 +7,22 @@
 **FL-paper-update-tracker** has been adapted into an automated GPU cluster and AI Infrastructure paper tracker. It follows AI/ML systems, cloud and operating systems, networking, HPC, computer architecture, and related systems journals. The repository name and generated `FL-Papers.md` filename are retained for compatibility with the original project.
 
 ### High-Level Workflow
-1. GitHub Actions runs the tracker once per day (cron: `0 0 * * *`) and on manual dispatch. Manual runs default to a read-only smoke test: one keyword, one venue, at most 10 results, and no enrichment, cache write, commit, or Issue. Normal code pushes do not trigger the expensive full scan.
-2. `src/main.py` reads `config.yaml` → takes GPU/AI-Infra `dblp.keywords` and plain venue restrictions from `dblp.queries`, assembles fully URL-encoded DBLP search topics, and queries the DBLP search API. Scheduled runs scan the full keyword × venue matrix.
-3. Extracted paper metadata is **filtered by year** (last 3 years + next 1 year) and **deduplicated by `ee` field**.
-4. New papers (not yet in `cached/dblp.yaml`) are collected, formatted as Markdown, and written to the `GITHUB_ENV` variable `MSG`.
-5. `scripts/convert_cache_to_md.py` regenerates `FL-Papers.md` from the updated cache.
-6. If new papers exist, the action `JasonEtco/create-an-issue@v2` creates a GitHub Issue using `.github/issue-template.md`.
-7. Both `cached/dblp.yaml` and `FL-Papers.md` are committed back to the repo so that subsequent runs know what has already been reported.
+1. GitHub Actions runs the tracker once per month (cron: `17 1 3 * *`) and on manual dispatch. Manual runs default to a read-only release check plus bundled parser tests; they do not download the large dump or mutate the repository.
+2. `scripts/sync_dblp_snapshot.py` discovers the newest official DBLP XML release on DROPS, downloads and MD5-verifies it on full runs, and stores the dump plus DTD under ignored `.cache/dblp/`. Actions caches this directory by exact release date.
+3. `src/dblp_snapshot.py` streams the gzip XML once and locally filters by year, DBLP record-key prefix, and title keyword. `src/main.py` consumes the resulting URL-encoded topic mapping, preserving the existing cache and Issue format.
+4. Extracted paper metadata is **filtered by year** (last 3 years + next 1 year) and **deduplicated by `ee` field**.
+5. New papers (not yet in `cached/dblp.yaml`) are collected, formatted as Markdown, and written to the `GITHUB_ENV` variable `MSG`.
+6. `scripts/convert_cache_to_md.py` regenerates `FL-Papers.md` from the updated cache.
+7. If new papers exist, the action `JasonEtco/create-an-issue@v2` creates a GitHub Issue using `.github/issue-template.md`.
+8. Both `cached/dblp.yaml` and `FL-Papers.md` are committed back to the repo so that subsequent runs know what has already been reported.
 
 ## Tech Stack
 
-- **Language**: Python 3.8+
+- **Language**: Python 3.13
 - **Core Dependencies** (see `requirements.txt`):
   - `fire` – CLI scaffolding
-  - `requests` – HTTP calls to DBLP API
+  - `requests` – official snapshot discovery/download plus metadata APIs
+  - `lxml` – bounded-memory XML parsing with the official local DTD
   - `loguru` – structured logging
   - `ezkfg` – lightweight config loader
   - `pyyaml` – cache read/write
@@ -40,10 +42,12 @@
 │   ├── convert_cache_to_md.py       # Converts cache to structured Markdown (domain-specific maps)
 │   ├── fetch_abstracts.py           # Backfill/refresh paper abstracts via external APIs
 │   ├── fetch_dois.py                # Backfill missing DOIs via DBLP / Crossref / Semantic Scholar
+│   ├── sync_dblp_snapshot.py        # Discover, verify, and download official XML releases
 │   ├── dedup_cache_by_title.py      # Deduplicate cache entries by title
 │   └── dedup_cache_global.py        # Global cross-topic deduplication for the cache
 ├── src/
-│   ├── main.py                      # Entry point: assembles topics from keyword+queries, orchestrates API calls
+│   ├── main.py                      # Entry point: consumes local topic results and updates the cache
+│   ├── dblp_snapshot.py             # DROPS release sync and streaming local XML filtering
 │   └── utils.py                     # Helper functions: API call, parsing, formatting, dedup
 ├── config.yaml                      # keyword, plain queries (venues), and mail targets
 ├── FL-Papers.md                     # Structured Markdown output of all tracked papers
@@ -97,6 +101,12 @@
 ### 6. Configuration (`config.yaml`)
 ```yaml
 dblp:
+  source: snapshot
+  snapshot:
+    path: .cache/dblp/dblp.xml.gz
+    dtd_path: .cache/dblp/dblp.dtd
+    query_key_prefixes:
+      "venue:MLSys:": conf/mlsys
   url: https://dblp.org/search/publ/api?q={}&format=json&h=1000
   keywords:
     - GPU cluster
@@ -113,16 +123,18 @@ dblp:
 ```
 - `keywords`: Independent GPU cluster and AI-Infra title-search expressions. Automatic and normal manual runs scan all `keywords × queries` combinations because the topics are complementary.
   - The optional `primary_only=True` compatibility mode is only appropriate when the remaining keywords are aliases of one primary theme. Do not enable it for the current multi-theme configuration.
-- `queries`: List of plain-text DBLP venue restrictions. The runner automatically URL-encodes each query and prepends the keyword before calling the API.
+- `source`: `snapshot` is the normal mode. `api` is retained only for legacy or small-workload compatibility.
+- `snapshot.query_key_prefixes`: Every configured query must map to a stable XML record-key prefix. Local filtering uses this mapping instead of sending venue searches to DBLP.
+- `queries`: List of plain-text venue labels. They are still URL-encoded with the keyword to preserve cache-key and Issue-link compatibility.
 - `mails`: The first email address (`mails[0]`) is used as the `contact_email` for the Crossref API User-Agent (`mailto:...`), which is recommended for polite API access. Additional addresses are reserved for future mail-notification features.
-- **Agent Note**: When adding a new venue, find its DBLP query syntax (venue code or stream ID) and append it to `dblp.queries`.
+- **Agent Note**: When adding a venue, append its query label to `dblp.queries` and its XML record-key prefix to `dblp.snapshot.query_key_prefixes`.
 - **Backward compatibility**: Old single-string `keyword` field is still supported and is automatically wrapped into a one-element list.
 
 ## Maintenance Notes
 
 ### Adding a New Venue
-1. Find the DBLP venue code (e.g., `venue:ICML` or `streamid:journals/pami`).
-2. Append the **plain** query string to `config.yaml` under `dblp.queries` (e.g., `venue:ICML:`). The runner handles URL encoding automatically.
+1. Find the DBLP venue code and XML record-key prefix (e.g., `venue:ICML:` and `conf/icml`).
+2. Append the query string to `dblp.queries` and the matching prefix to `dblp.snapshot.query_key_prefixes`.
 3. Update `scripts/convert_cache_to_md.py` if you want the new venue mapped to a specific category in `FL-Papers.md`.
 4. Update `README.md` (both EN and CN sections) to list the new venue.
 5. Update this `AGENTS.md` if the change affects architecture or conventions.
@@ -219,7 +231,7 @@ No changes to `src/main.py` or the GitHub Actions workflow are required. Review 
 
 ### Changing Workflow Schedule
 - Edit `.github/workflows/watch.yml` → `schedule.cron`.
-- Default is daily at 00:00 UTC+8 (`0 0 * * *`).
+- Default is monthly on day 3 at 01:17 UTC (`17 1 3 * *`), matching DBLP's monthly release cadence.
 
 ### Cache Corruption / Manual Reset
 - Simply delete `cached/dblp.yaml` (or remove specific topic keys).
@@ -228,13 +240,16 @@ No changes to `src/main.py` or the GitHub Actions workflow are required. Review 
 ## Testing Locally
 
 ```bash
+python scripts/sync_dblp_snapshot.py
 cd src
 python main.py run --env=dev
 ```
 
+The initial compressed snapshot download is about 1 GiB. Later runs reuse the same monthly release from `.cache/dblp/`.
+
 In `dev` mode the script will:
 - Load the cache
-- Query DBLP with **all** keywords and venues
+- Stream the local snapshot for **all** keywords and venues
 - Print logs to stdout
 - **Not** write to `GITHUB_ENV`
 
@@ -243,13 +258,13 @@ You can inspect `aggregated_msg` and `msg` in the logs to preview the issue cont
 Additional CLI flags:
 - `--primary_only` — Optional compatibility mode: the first keyword scans all venues and the remaining keywords only scan venues where it found new papers. It is not used by the current automatic workflow.
 - `--all_years` — Disables the year filter and skips abstract fetching / translation (used by the `Fetch All Years Papers` workflow).
-- `--keyword_limit`, `--query_limit`, and `--max_results` — Bound smoke-test scope.
+- `--keyword_limit`, `--query_limit`, and `--max_results` — Bound local processing scope.
 - `--dry_run` and `--skip_enrichment` — Keep smoke tests read-only and avoid external metadata calls.
-- `--fail_on_request_error` — Makes connectivity failures fail the CI smoke test instead of being treated as an empty result.
+- `--fail_on_request_error` — Legacy API-mode option that turns request failures into a non-zero exit.
 
 ## Common Pitfalls
 
-1. **Rate Limiting**: DBLP does not publish explicit rate limits. The code uses a conservative base interval (`6 + random(0.5, 2.5)` seconds for search requests) plus stricter exponential backoff with jitter and Retry-After support when requests fail or are rate-limited. Do not weaken this behavior.
+1. **Snapshot Size**: The official gzip release is about 1 GiB. Keep it under `.cache/dblp/`, never commit it, stream the XML, and retain the release-keyed Actions cache. Do not add challenge-solving or verification-bypass code; `source: api` remains only a legacy compatibility path.
 2. **YAML Encoding**: `cached/dblp.yaml` is written with `allow_unicode=True`. Editing it manually with an editor that strips Unicode may corrupt author names.
 3. **Empty `ee` Field**: Some older DBLP entries lack an `ee`. The deduplication logic skips empty `ee` values, so those papers are always retained. This is intentional to avoid data loss.
 4. **Topic String Parsing**: `get_topic_short_name` relies on `split(":")[-2]` followed by `split("/")[-1]`. If DBLP changes its topic URL format, this will break.
@@ -258,4 +273,4 @@ Additional CLI flags:
 
 - Original project: [FL-paper-update-tracker](https://github.com/youngfish42/FL-paper-update-tracker)
 - Upstream inspiration: [dblp-watcher](https://github.com/beiyuouo/dblp-watcher/)
-- DBLP API docs: https://dblp.org/faq/How+to+use+the+dblp+search+API.html
+- Official DBLP XML releases: https://drops.dagstuhl.de/entities/collection/10.4230/dblp.xml
