@@ -1,0 +1,51 @@
+dblp:
+  url: https://dblp.org/search/publ/api?q={}&format=json&h=1000
+  keywords:
+    # GPU clusters and resource management
+    - GPU cluster
+    - GPU schedul
+    - GPU resource
+    - accelerator cluster
+    # AI training and inference infrastructure
+    - AI infrastructure
+    - ML system
+    - distributed training
+    - parallel training
+    - LLM inference
+    - model serving
+    - inference serving
+    # Communication and orchestration
+    - collective communication
+    - RDMA
+    - Kubernetes
+    - tensor parallel
+    - pipeline parallel
+  queries:
+    # AI / ML systems
+    - "venue:MLSys:"
+    - "venue:NeurIPS:"
+    - "venue:ICML:"
+    - "venue:ICLR:"
+    # Operating systems, cloud, and distributed systems
+    - "venue:OSDI:"
+    - "venue:SOSP:"
+    - "streamid:conf/eurosys:"
+    - "streamid:conf/usenix:"
+    - "streamid:conf/cloud:"
+    - "venue:Middleware:"
+    # Networking and communication
+    - "venue:NSDI:"
+    - "venue:SIGCOMM:"
+    # High-performance computing
+    - "streamid:conf/sc:"
+    - "venue:HPDC:"
+    # Computer architecture and accelerators
+    - "venue:ASPLOS:"
+    - "venue:ISCA:"
+    - "venue:MICRO:"
+    - "venue:HPCA:"
+    # Systems journals
+    - "streamid:journals/tocs:"
+    - "streamid:journals/tpds:"
+  mails:
+    - "im.young@foxmail.com"
