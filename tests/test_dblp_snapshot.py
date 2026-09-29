@@ -22,11 +22,11 @@ class DblpSnapshotTests(unittest.TestCase):
         )
 
     def test_truncated_keyword_tokens_match_title_words(self):
-        self.assertTrue(title_matches_keyword("GPU Cluster Scheduling", "GPU schedul"))
-        self.assertFalse(title_matches_keyword("CPU Cluster Scheduling", "GPU schedul"))
+        self.assertTrue(title_matches_keyword("AI Infrastructure Scheduling", "AI schedul"))
+        self.assertFalse(title_matches_keyword("Storage Infrastructure Scheduling", "AI schedul"))
 
     def test_streaming_parser_filters_year_venue_and_keyword(self):
-        keywords = ["GPU schedul", "RDMA", "Kubernetes"]
+        keywords = ["AI schedul", "RDMA", "Kubernetes"]
         queries = ["venue:MLSys:", "streamid:journals/tpds:"]
         results = load_snapshot_items_by_topic(
             snapshot_path=ROOT / "tests" / "fixtures" / "dblp_sample.xml",
@@ -42,7 +42,7 @@ class DblpSnapshotTests(unittest.TestCase):
         )
 
         gpu_topic = (
-            f"{urllib.parse.quote('GPU schedul', safe='')}%20"
+            f"{urllib.parse.quote('AI schedul', safe='')}%20"
             f"{urllib.parse.quote('venue:MLSys:', safe='')}"
         )
         rdma_topic = (

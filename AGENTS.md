@@ -4,7 +4,7 @@
 
 ## Project Overview
 
-**FL-paper-update-tracker** has been adapted into an automated GPU cluster and AI Infrastructure paper tracker. It follows AI/ML systems, cloud and operating systems, networking, HPC, computer architecture, and related systems journals. The repository name and generated `FL-Papers.md` filename are retained for compatibility with the original project.
+**FL-paper-update-tracker** has been adapted into an automated AI Infrastructure paper tracker. It follows AI/ML systems, cloud and operating systems, networking, HPC, computer architecture, and related systems journals. The repository name and generated `FL-Papers.md` filename are retained for compatibility with the original project.
 
 ### High-Level Workflow
 1. GitHub Actions runs the tracker once per month (cron: `17 1 3 * *`) and on manual dispatch. Manual runs default to a read-only release check plus bundled parser tests; they do not download the large dump or mutate the repository.
@@ -109,7 +109,7 @@ dblp:
       "venue:MLSys:": conf/mlsys
   url: https://dblp.org/search/publ/api?q={}&format=json&h=1000
   keywords:
-    - GPU cluster
+    - AI infrastructure
     - distributed training
     - LLM inference
     - Kubernetes
@@ -121,7 +121,7 @@ dblp:
   mails:
     - "im.young@foxmail.com"
 ```
-- `keywords`: Independent GPU cluster and AI-Infra title-search expressions. Automatic and normal manual runs scan all `keywords × queries` combinations because the topics are complementary.
+- `keywords`: Independent AI-Infra title-search expressions. Automatic and normal manual runs scan all `keywords × queries` combinations because the topics are complementary.
   - The optional `primary_only=True` compatibility mode is only appropriate when the remaining keywords are aliases of one primary theme. Do not enable it for the current multi-theme configuration.
 - `source`: `snapshot` is the normal mode. `api` is retained only for legacy or small-workload compatibility.
 - `snapshot.query_key_prefixes`: Every configured query must map to a stable XML record-key prefix. Local filtering uses this mapping instead of sending venue searches to DBLP.
@@ -197,7 +197,7 @@ dblp:
 - **Automatic related code extraction**: `src/main.py` already calls `extract_github_links()` inside `fetch_abstract_for_papers()` for every batch of new papers, so newly discovered papers get their code links filled automatically during the daily GitHub Actions run.
 
 ### Switching to a Different Research Domain
-The tracker remains domain-agnostic. To pivot away from the current GPU cluster and AI Infrastructure focus:
+The tracker remains domain-agnostic. To pivot away from the current AI Infrastructure focus:
 
 1. **Change the keywords** in `config.yaml`:
    ```yaml

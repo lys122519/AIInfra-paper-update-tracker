@@ -68,7 +68,7 @@ dblp:
       "streamid:conf/sc:": conf/sc
   url: https://dblp.org/search/publ/api?q={}&format=json&h=1000
   keywords:
-    - GPU cluster
+    - AI infrastructure
     - distributed training
     - LLM inference
     - Kubernetes
@@ -90,7 +90,7 @@ dblp:
 | `dblp.snapshot.path` / `dtd_path` | Local files created by `scripts/sync_dblp_snapshot.py`; both live under the ignored `.cache/` directory. |
 | `dblp.snapshot.query_key_prefixes` | Maps each configured query label to a stable DBLP record-key prefix, such as `venue:MLSys:` → `conf/mlsys`. |
 | `dblp.url` | Legacy search API endpoint; used only when `dblp.source: api`. |
-| `dblp.keywords` | List of independent title-search expressions for GPU clusters and AI infrastructure. Normal and scheduled runs scan all keyword/venue combinations. The first item only has special meaning when `--primary_only` is explicitly enabled. |
+| `dblp.keywords` | List of independent title-search expressions for AI infrastructure. Normal and scheduled runs scan all keyword/venue combinations. The first item only has special meaning when `--primary_only` is explicitly enabled. |
 | `dblp.queries` | List of plain-text venue labels. The runner combines them with keywords only to preserve the existing encoded cache keys and display links. |
 | `dblp.mails` | The first address is used as the Crossref API contact email. Additional addresses are reserved for future mail-notification features. |
 

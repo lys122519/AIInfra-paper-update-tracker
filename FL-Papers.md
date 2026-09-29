@@ -1,1 +1,1 @@
-# GPU Cluster & AI Infrastructure Papers
+# AI Infrastructure Papers

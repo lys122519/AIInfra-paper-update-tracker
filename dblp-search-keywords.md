@@ -1,4 +1,4 @@
-# GPU 集群与 AI Infrastructure 检索词设计
+# AI Infrastructure 检索词设计
 
 本文档说明 `config.yaml` 中检索词的覆盖范围。程序在官方 DBLP XML 快照中对标题进行本地匹配，因此关键词应使用论文标题中常见、可辨识的技术表达，避免仅使用 `system`、`performance`、`network` 等高噪声单词。
 
@@ -6,7 +6,8 @@
 
 | 层次 | 检索词 | 主要覆盖内容 |
 |---|---|---|
-| GPU 集群 | `GPU cluster` | 集群设计、扩展、故障与管理 |
+| AI 基础设施 | `AI infrastructure` | AI 系统底层平台、工程架构与基础设施 |
+| AI 资源管理 | `AI schedul` | AI 工作负载调度、任务放置与资源编排 |
 | 资源管理 | `GPU schedul` | GPU scheduler、scheduling 与任务放置 |
 | 资源管理 | `GPU resource` | 共享、隔离、弹性与利用率 |
 | 加速器集群 | `accelerator cluster` | 异构加速器与大规模部署 |
@@ -30,7 +31,7 @@
 - MLSys、NeurIPS、ICML、ICLR：训练、推理和 ML 系统
 - OSDI、SOSP、EuroSys、USENIX ATC、SoCC、Middleware：操作系统、云平台、调度和 Kubernetes
 - NSDI、SIGCOMM：数据中心网络、RDMA 和集合通信
-- SC、HPDC：GPU 集群与高性能计算
+- SC、HPDC：大规模算力基础设施与高性能计算
 - ASPLOS、ISCA、MICRO、HPCA：加速器、内存与体系结构
 - TOCS、TPDS：系统与并行分布式计算期刊
 

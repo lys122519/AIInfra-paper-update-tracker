@@ -4,7 +4,7 @@
   <inproceedings key="conf/mlsys/Smith26">
     <author>Alice M&uuml;ller</author>
     <author>Bob Chen</author>
-    <title>Efficient GPU Cluster Scheduling for Large Models</title>
+    <title>Efficient AI Infrastructure Scheduling for Large Models</title>
     <year>2026</year>
     <booktitle>MLSys</booktitle>
     <ee type="oa">https://doi.org/10.1000/gpu.2026</ee>
@@ -18,7 +18,7 @@
   </article>
   <inproceedings key="conf/other/Untracked26">
     <author>Dan Wu</author>
-    <title>GPU Cluster Scheduling Outside the Selected Venues</title>
+    <title>AI Infrastructure Scheduling Outside the Selected Venues</title>
     <year>2026</year>
     <booktitle>OtherConf</booktitle>
   </inproceedings>

@@ -1,10 +1,10 @@
-# GPU Cluster & AI Infrastructure Paper Tracker
+# AI Infrastructure Paper Tracker
 
-An automated DBLP paper tracker for GPU clusters and AI infrastructure. It follows the systems stack from accelerators and high-performance networking through distributed training, inference serving, resource scheduling, cloud orchestration, and Kubernetes.
+An automated DBLP paper tracker for AI infrastructure. It follows the complete systems stack from accelerators and high-performance networking through distributed training, inference serving, resource management, cloud orchestration, and Kubernetes.
 
 ## Research Scope
 
-- GPU cluster scheduling, placement, sharing, and utilization
+- Compute-resource scheduling, placement, sharing, and utilization
 - Distributed and parallel training infrastructure
 - LLM inference, model serving, and serving optimization
 - Collective communication, RDMA, and network-performance engineering
@@ -29,7 +29,7 @@ An automated DBLP paper tracker for GPU clusters and AI infrastructure. It follo
 - **Architecture & Accelerators:** ASPLOS, ISCA, MICRO, HPCA
 - **Systems Journals:** ACM TOCS, IEEE TPDS
 
-The keywords and venue restrictions live in [`config.yaml`](config.yaml). The current keywords cover GPU clusters, scheduling, distributed/parallel training, inference serving, collective communication, RDMA, Kubernetes, and tensor/pipeline parallelism.
+The keywords and venue restrictions live in [`config.yaml`](config.yaml). The current keywords cover compute-resource management, distributed/parallel training, inference serving, collective communication, RDMA, Kubernetes, and tensor/pipeline parallelism.
 
 ## Run Locally
 
@@ -52,13 +52,13 @@ For deployment, configuration, and maintenance details, see [`TECHNICAL.md`](TEC
 
 ---
 
-# GPU 集群与 AI 基础设施论文追踪器
+# AI 基础设施论文追踪器
 
-这是一个面向 GPU 集群与 AI Infrastructure 的自动化 DBLP 论文追踪器，覆盖从加速器、高性能网络，到分布式训练、推理服务、资源调度、云平台和 Kubernetes 的完整系统链路。
+这是一个面向 AI Infrastructure 的自动化 DBLP 论文追踪器，覆盖从加速器、高性能网络，到分布式训练、推理服务、资源管理、云平台和 Kubernetes 的完整系统链路。
 
 ## 研究范围
 
-- GPU 集群调度、任务放置、资源共享与利用率优化
+- 算力资源调度、任务放置、资源共享与利用率优化
 - 分布式训练与并行训练基础设施
 - 大模型推理、模型服务与推理性能优化
 - 集合通信、RDMA 与网络性能工程
@@ -83,7 +83,7 @@ For deployment, configuration, and maintenance details, see [`TECHNICAL.md`](TEC
 - **体系结构与加速器：** ASPLOS、ISCA、MICRO、HPCA
 - **系统期刊：** ACM TOCS、IEEE TPDS
 
-关键词和 venue 限制位于 [`config.yaml`](config.yaml)。当前关键词覆盖 GPU 集群与调度、分布式/并行训练、推理服务、集合通信、RDMA、Kubernetes，以及张量/流水线并行。
+关键词和 venue 限制位于 [`config.yaml`](config.yaml)。当前关键词覆盖算力资源管理、分布式/并行训练、推理服务、集合通信、RDMA、Kubernetes，以及张量/流水线并行。
 
 ## 本地运行
 

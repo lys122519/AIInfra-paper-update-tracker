@@ -4,7 +4,7 @@ Convert cached/dblp.yaml into a structured Markdown file.
 
 NOTE ON DOMAIN SWITCHING ──────────────────────────────────────────────
 The mappings below (VENUE_MAP, CATEGORY_MAP, CATEGORY_ORDER, VENUE_ORDER)
-are tailored to GPU clusters and AI infrastructure and the
+are tailored to AI infrastructure and the
 venue list in config.yaml. If you change the ``keywords`` in config.yaml
 to track a different domain (e.g. diffusion, LLM), you MUST review and
 update these mappings to match the new venue set and desired categories.
@@ -164,7 +164,7 @@ def main():
 
     # Build Markdown
     lines = []
-    lines.append("# GPU Cluster & AI Infrastructure Papers\n")
+    lines.append("# AI Infrastructure Papers\n")
 
     for category in CATEGORY_ORDER:
         if category not in aggregated:

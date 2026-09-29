@@ -28,13 +28,13 @@ dblp:
       "streamid:journals/tocs:": journals/tocs
       "streamid:journals/tpds:": journals/tpds
   keywords:
-    # GPU clusters and resource management
-    - GPU cluster
+    # AI infrastructure and resource management
+    - AI infrastructure
+    - AI schedul
     - GPU schedul
     - GPU resource
     - accelerator cluster
     # AI training and inference infrastructure
-    - AI infrastructure
     - ML system
     - distributed training
     - parallel training

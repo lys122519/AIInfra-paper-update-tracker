@@ -33,7 +33,7 @@ class SmokeModeTests(unittest.TestCase):
             "dblp": {
                 "source": "api",
                 "url": "https://dblp.org/search/publ/api?q={}&format=json&h=1000",
-                "keywords": ["GPU cluster"],
+                "keywords": ["AI infrastructure"],
                 "queries": ["venue:MLSys:"],
                 "mails": [],
             },
