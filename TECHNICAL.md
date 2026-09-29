@@ -48,6 +48,7 @@ Additional CLI flags:
 - `--keyword_limit` / `--query_limit` / `--max_results` — Bound a smoke test to a small number of keywords, venues, and API results.
 - `--dry_run` — Process results without writing cache changes.
 - `--skip_enrichment` — Skip abstract retrieval and translation.
+- `--fail_on_request_error` — Exit non-zero when DBLP cannot be reached; intended for CI smoke tests.
 
 ---
 

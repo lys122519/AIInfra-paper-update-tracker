@@ -316,6 +316,15 @@ def request_data(url, retry=10, sleep_time=6.0, timeout=15):
                 )
                 continue
             response.raise_for_status()
+            content_type = (response.headers.get("Content-Type") or "").lower()
+            if "text/html" in content_type:
+                body_preview = response.text[:300].lower()
+                if "not a bot" in body_preview or "<!doctype html" in body_preview:
+                    logger.error(
+                        "DBLP returned an HTML verification page instead of JSON; "
+                        "automated API access is blocked from this network."
+                    )
+                    return None
             return response.json()
         except Exception as e:
             logger.error(f"Exception: {e}")

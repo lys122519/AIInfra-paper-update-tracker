@@ -245,6 +245,7 @@ Additional CLI flags:
 - `--all_years` — Disables the year filter and skips abstract fetching / translation (used by the `Fetch All Years Papers` workflow).
 - `--keyword_limit`, `--query_limit`, and `--max_results` — Bound smoke-test scope.
 - `--dry_run` and `--skip_enrichment` — Keep smoke tests read-only and avoid external metadata calls.
+- `--fail_on_request_error` — Makes connectivity failures fail the CI smoke test instead of being treated as an empty result.
 
 ## Common Pitfalls
 

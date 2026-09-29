@@ -38,6 +38,7 @@ class Scaffold:
         max_results: int = 0,
         dry_run: bool = False,
         skip_enrichment: bool = False,
+        fail_on_request_error: bool = False,
     ):
         cfg = init(cfg_path=cfg)
 
@@ -121,6 +122,8 @@ class Scaffold:
 
             if dblp_data is None:
                 logger.error(f"dblp_data is None, topic: {topic}")
+                if fail_on_request_error:
+                    raise RuntimeError(f"DBLP request failed for smoke-test topic: {topic}")
                 return 0
 
             # 解析 DBLP 返回的原始数据，提取需要的字段

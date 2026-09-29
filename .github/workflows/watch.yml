@@ -48,7 +48,7 @@ jobs:
       - name: Run DBLP smoke test
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.smoke_test }}
         run: |
-          cd src && python main.py run --env=dev --all_years --keyword_limit=1 --query_limit=1 --max_results=10 --dry_run --skip_enrichment
+          cd src && python main.py run --env=dev --all_years --keyword_limit=1 --query_limit=1 --max_results=10 --dry_run --skip_enrichment --fail_on_request_error
 
       - name: Run full DBLP watcher
         if: ${{ github.event_name != 'workflow_dispatch' || !inputs.smoke_test }}
