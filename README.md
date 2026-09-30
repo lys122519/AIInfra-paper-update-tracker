@@ -2,6 +2,8 @@
 
 An automated DBLP paper tracker for AI infrastructure. It follows the complete systems stack from accelerators and high-performance networking through distributed training, inference serving, resource management, cloud orchestration, and Kubernetes.
 
+This repository is the automated candidate-paper pipeline for [Awesome-AIInfra](https://github.com/lys122519/Awesome-AIInfra). Watch this tracker for real-time discovery notifications; use Awesome-AIInfra for the reviewed and curated collection.
+
 ## Research Scope
 
 - Compute-resource scheduling, placement, sharing, and utilization
@@ -67,6 +69,8 @@ For deployment, configuration, and maintenance details, see [`TECHNICAL.md`](TEC
 # AI 基础设施论文追踪器
 
 这是一个面向 AI Infrastructure 的自动化 DBLP 论文追踪器，覆盖从加速器、高性能网络，到分布式训练、推理服务、资源管理、云平台和 Kubernetes 的完整系统链路。
+
+本仓库是 [Awesome-AIInfra](https://github.com/lys122519/Awesome-AIInfra) 的自动化候选论文管线。关注本仓库可获得实时发现通知；Awesome-AIInfra 则维护经过人工审核与整理的正式知识库。
 
 ## 研究范围
 
