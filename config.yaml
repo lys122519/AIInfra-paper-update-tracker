@@ -83,6 +83,48 @@ dblp:
     - Kubernetes
     - tensor parallel
     - pipeline parallel
+  filters:
+    # Global title exclusions. These are matched case-insensitively and support
+    # prefix stems. They remove FL papers even when an efficiency keyword also
+    # appears in the title.
+    exclude_title_keywords:
+      - federated
+      - FedAvg
+      - cross-silo
+      - cross-device federat
+    # Broad method names need at least one systems/efficiency context signal.
+    # Narrow infrastructure keywords (serving, scheduling, RDMA, etc.) do not
+    # need an additional rule.
+    require_any_by_keyword:
+      quantization: &infra_context
+        - inference
+        - serving
+        - training
+        - efficient
+        - efficiency
+        - system
+        - hardware
+        - accelerator
+        - GPU
+        - memory
+        - latency
+        - throughput
+        - parallel
+        - distributed
+        - communication
+        - schedul
+        - resource
+        - deploy
+        - compression
+        - cache
+        - kernel
+        - LLM
+        - language model
+        - transformer
+        - vision-language
+      mixture of experts: *infra_context
+      long context: *infra_context
+      model compression: *infra_context
   queries:
     # AI / ML systems
     - "venue:MLSys:"

@@ -14,6 +14,7 @@ An automated DBLP paper tracker for AI infrastructure. It follows the complete s
 ## Features
 
 - Reads DBLP's official monthly XML snapshot and filters a curated set of AI/ML, NLP, retrieval, multimodal, systems, networking, HPC, and architecture venues locally
+- Applies configurable title exclusions and requires infrastructure context for broad method keywords such as quantization, mixture-of-experts, model compression, and long context
 - Keeps papers from the last three years through the next year
 - Deduplicates records by publication URL and title, including across search topics
 - Fetches abstracts and DOI metadata, extracts GitHub repository links, and optionally translates abstracts into Chinese with Qwen-MT-plus
@@ -34,6 +35,13 @@ An automated DBLP paper tracker for AI infrastructure. It follows the complete s
 - **Systems Journals:** ACM TOCS, IEEE TPDS
 
 The keywords and venue restrictions live in [`config.yaml`](config.yaml). The current keywords cover compute-resource management, distributed/parallel training, LLM serving and efficiency, model compression, quantization, speculative decoding, KV-cache management, mixture-of-experts, collective communication, RDMA, Kubernetes, and model parallelism.
+
+Filtering rules live under `dblp.filters`. `exclude_title_keywords` removes unwanted areas such as federated learning, while `require_any_by_keyword` requires broad method names to appear with a systems or efficiency signal. After changing these rules, apply them to existing data and rebuild the paper list:
+
+```bash
+python scripts/filter_cache.py
+python scripts/convert_cache_to_md.py
+```
 
 ## Run Locally
 
@@ -72,6 +80,7 @@ For deployment, configuration, and maintenance details, see [`TECHNICAL.md`](TEC
 ## 主要能力
 
 - 使用 DBLP 官方月度 XML 快照，在本地筛选 AI/ML、NLP、检索、多模态、系统、网络、HPC 和体系结构领域的精选 venue
+- 支持可配置的标题排除规则，并要求量化、混合专家、模型压缩和长上下文等宽泛关键词同时具备基础设施语境
 - 仅保留近三年至未来一年的论文
 - 按论文链接和标题去重，并支持跨检索主题的全局去重
 - 自动补充摘要和 DOI、提取 GitHub 代码链接，并可通过 Qwen-MT-plus 翻译中文摘要
@@ -107,6 +116,8 @@ python main.py run --env=dev
 如需安全测试 GitHub 网络连接，可打开 **Actions → Run DBLP Watch → Run workflow**，并保持 `smoke_test` 开启。该模式仅发现最新官方版本、执行 HEAD 校验并运行内置解析测试，不下载大型快照，不更新缓存、不抓取摘要、不提交文件，也不创建 Issue。
 
 该方案遵循 DBLP 对批量访问的建议，不会自动处理或绕过交互式验证挑战。定时工作流改为每月运行，与快照发布节奏一致。
+
+过滤规则位于 `config.yaml` 的 `dblp.filters`。修改规则后，可运行 `python scripts/filter_cache.py` 清理已有缓存，再运行 `python scripts/convert_cache_to_md.py` 重新生成论文列表。
 
 去重和 Markdown 生成只读取当前配置对应的检索主题；切换研究范围时可以重置 `cached/dblp.yaml`，同时回收仓库空间。
 

@@ -9,7 +9,7 @@
 ### High-Level Workflow
 1. GitHub Actions runs the tracker once per month (cron: `17 1 3 * *`) and on manual dispatch. Manual runs default to a read-only release check plus bundled parser tests; they do not download the large dump or mutate the repository.
 2. `scripts/sync_dblp_snapshot.py` discovers the newest official DBLP XML release on DROPS, downloads and MD5-verifies it on full runs, and stores the dump plus DTD under ignored `.cache/dblp/`. Actions caches this directory by exact release date.
-3. `src/dblp_snapshot.py` streams the gzip XML once and locally filters by year, DBLP record-key prefix, and title keyword. `src/main.py` consumes the resulting URL-encoded topic mapping, preserving the existing cache and Issue format.
+3. `src/dblp_snapshot.py` streams the gzip XML once and locally filters by year, DBLP record-key prefix, title keyword, and the rules in `dblp.filters`. `src/main.py` consumes the resulting URL-encoded topic mapping, preserving the existing cache and Issue format.
 4. Extracted paper metadata is **filtered by year** (last 3 years + next 1 year) and **deduplicated by `ee` field**.
 5. New papers (not yet in `cached/dblp.yaml`) are collected, formatted as Markdown, and written to the `GITHUB_ENV` variable `MSG`.
 6. `scripts/convert_cache_to_md.py` regenerates `AIInfra-Papers.md` from the updated cache.
@@ -43,10 +43,12 @@
 │   ├── fetch_dois.py                # Backfill missing DOIs via DBLP / Crossref / Semantic Scholar
 │   ├── sync_dblp_snapshot.py        # Discover, verify, and download official XML releases
 │   ├── dedup_cache_by_title.py      # Deduplicate cache entries by title
-│   └── dedup_cache_global.py        # Global cross-topic deduplication for the cache
+│   ├── dedup_cache_global.py        # Global cross-topic deduplication for the cache
+│   └── filter_cache.py              # Apply current title filters to existing cache data
 ├── src/
 │   ├── main.py                      # Entry point: consumes local topic results and updates the cache
 │   ├── dblp_snapshot.py             # DROPS release sync and streaming local XML filtering
+│   ├── paper_filters.py             # Configurable title exclusions and context rules
 │   └── utils.py                     # Helper functions: API call, parsing, formatting, dedup
 ├── config.yaml                      # keyword, plain queries (venues), and mail targets
 ├── AIInfra-Papers.md                # Structured Markdown output of all tracked papers
@@ -128,6 +130,13 @@ dblp:
 - `mails`: The first email address (`mails[0]`) is used as the `contact_email` for the Crossref API User-Agent (`mailto:...`), which is recommended for polite API access. Additional addresses are reserved for future mail-notification features.
 - **Agent Note**: When adding a venue, append its query label to `dblp.queries` and its XML record-key prefix to `dblp.snapshot.query_key_prefixes`.
 - **Backward compatibility**: Old single-string `keyword` field is still supported and is automatically wrapped into a one-element list.
+
+### 7. Relevance Filtering
+- `dblp.filters.exclude_title_keywords` contains global, case-insensitive title exclusions. Expression tokens match consecutive title-token prefixes, allowing stems such as `federat`.
+- `dblp.filters.require_any_by_keyword` maps broad search keywords to positive systems/efficiency context expressions. At least one expression must be present in the title.
+- Both snapshot and legacy API modes apply the same rules before caching or enrichment.
+- After changing filter rules, run `python scripts/filter_cache.py --dry-run`, then `python scripts/filter_cache.py` and `python scripts/convert_cache_to_md.py` to update existing data.
+- **Agent Note**: Prefer positive context rules for broad keywords over long lists of application-domain exclusions. Add tests for every new filtering behavior.
 
 ## Maintenance Notes
 

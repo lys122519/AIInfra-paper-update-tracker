@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from dblp_snapshot import load_snapshot_items_by_topic, title_matches_keyword  # noqa: E402
+from paper_filters import paper_passes_filters, title_matches_expression  # noqa: E402
 import utils  # noqa: E402
 
 
@@ -35,6 +36,36 @@ class DblpSnapshotTests(unittest.TestCase):
     def test_truncated_keyword_tokens_match_title_words(self):
         self.assertTrue(title_matches_keyword("AI Infrastructure Scheduling", "AI schedul"))
         self.assertFalse(title_matches_keyword("Storage Infrastructure Scheduling", "AI schedul"))
+
+    def test_title_filters_exclude_fl_and_require_infra_context(self):
+        filters = {
+            "exclude_title_keywords": ["federated", "FedAvg"],
+            "require_any_by_keyword": {
+                "mixture of experts": ["inference", "training", "serving", "system"],
+            },
+        }
+        self.assertTrue(title_matches_expression("Communication-Efficient Federated Learning", "federat"))
+        self.assertFalse(
+            paper_passes_filters(
+                "Communication-Efficient Federated Learning with Quantization",
+                "quantization",
+                filters,
+            )
+        )
+        self.assertFalse(
+            paper_passes_filters(
+                "A Mixture of Experts Framework for Disease Progression",
+                "mixture of experts",
+                filters,
+            )
+        )
+        self.assertTrue(
+            paper_passes_filters(
+                "Fast Mixture-of-Experts Inference with Expert Parallelism",
+                "mixture of experts",
+                filters,
+            )
+        )
 
     def test_streaming_parser_filters_year_venue_and_keyword(self):
         keywords = ["AI schedul", "RDMA", "Kubernetes"]

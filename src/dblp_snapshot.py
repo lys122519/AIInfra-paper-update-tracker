@@ -19,6 +19,7 @@ from typing import Iterable
 import requests
 from loguru import logger
 from lxml import etree
+from paper_filters import paper_passes_filters
 
 
 COLLECTION_URL = "https://drops.dagstuhl.de/entities/collection/10.4230/dblp.xml"
@@ -279,6 +280,7 @@ def load_snapshot_items_by_topic(
     min_year: int | None = None,
     max_year: int | None = None,
     max_results: int = 0,
+    filters: dict | None = None,
 ) -> dict[str, list[dict]]:
     """Stream one XML dump and distribute matching records into topic lists."""
     keywords = list(keywords)
@@ -335,7 +337,10 @@ def load_snapshot_items_by_topic(
                     if in_year_range:
                         title = _element_text(element, "title")
                         matching_keywords = [
-                            keyword for keyword in keywords if title_matches_keyword(title, keyword)
+                            keyword
+                            for keyword in keywords
+                            if title_matches_keyword(title, keyword)
+                            and paper_passes_filters(title, keyword, filters)
                         ]
                         if matching_keywords:
                             item = _record_to_item(element)

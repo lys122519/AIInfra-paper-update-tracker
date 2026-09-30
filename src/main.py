@@ -9,6 +9,7 @@ from utils import (
     get_configured_topics,
 )
 from dblp_snapshot import load_snapshot_items_by_topic
+from paper_filters import paper_passes_filters
 import yaml
 import datetime
 import urllib.parse
@@ -119,6 +120,7 @@ class Scaffold:
                 min_year=None if all_years else current_year - 3,
                 max_year=None if all_years else current_year + 1,
                 max_results=max_results,
+                filters=cfg["dblp"].get("filters", {}),
             )
         elif dblp_source != "api":
             raise ValueError("Invalid `dblp.source`: expected `snapshot` or `api`")
@@ -156,6 +158,13 @@ class Scaffold:
                         raise RuntimeError(f"DBLP request failed for smoke-test topic: {topic}")
                     return 0
                 items = get_dblp_items(dblp_data)
+                items = [
+                    item
+                    for item in items
+                    if paper_passes_filters(
+                        item.get("title", ""), keyword, cfg["dblp"].get("filters", {})
+                    )
+                ]
             # logger.info(f"items: {items}")
 
             # 按年份过滤，仅保留近三年及未来一年的论文（如 2026 年则保留 2023-2027）
