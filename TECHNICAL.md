@@ -124,7 +124,7 @@ This repository uses [GitHub Actions](.github/workflows/watch.yml) to run the tr
 
 | Trigger | Description |
 |---------|-------------|
-| **Schedule** | Twice per month, on days 3 and 17 at 01:17 UTC (`cron: 17 1 3,17 * *`) |
+| **Schedule** | Twice per month, on days 3 and 17 at 01:15 UTC (`cron: 15 1 3,17 * *`) |
 | **Manual** | Via `workflow_dispatch`; `smoke_test` defaults to release discovery plus local parser tests |
 
 ### Execution Steps
@@ -225,7 +225,7 @@ Edit `.github/workflows/watch.yml`:
 
 ```yaml
 schedule:
-  - cron: '17 1 3,17 * *'
+  - cron: '15 1 3,17 * *'
 ```
 
 ### Backfill Abstracts

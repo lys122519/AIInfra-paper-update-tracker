@@ -7,7 +7,7 @@
 **AIInfra-paper-update-tracker** is an automated AI Infrastructure paper tracker. It follows AI/ML systems, NLP and language models, retrieval, multimodal learning, cloud and operating systems, networking, HPC, computer architecture, and related journals.
 
 ### High-Level Workflow
-1. GitHub Actions updates the tracker twice per month, on days 3 and 17 at 01:17 UTC (`17 1 3,17 * *`), and supports manual dispatch. Manual runs default to a read-only release check plus bundled parser tests; they do not download the large dump or mutate the repository.
+1. GitHub Actions updates the tracker twice per month, on days 3 and 17 at 01:15 UTC (`15 1 3,17 * *`), and supports manual dispatch. Manual runs default to a read-only release check plus bundled parser tests; they do not download the large dump or mutate the repository.
 2. `scripts/sync_dblp_snapshot.py` discovers the newest official DBLP XML release on DROPS, downloads and MD5-verifies it on full runs, and stores the dump plus DTD under ignored `.cache/dblp/`. Actions caches this directory by exact release date.
 3. `src/dblp_snapshot.py` streams the gzip XML once and locally filters by year, DBLP record-key prefix, title keyword, and the rules in `dblp.filters`. `src/main.py` consumes the resulting URL-encoded topic mapping, preserving the existing cache and Issue format.
 4. Extracted paper metadata is **filtered by year** (last 3 years + next 1 year) and **deduplicated by `ee` field**.
@@ -247,7 +247,7 @@ No changes to `src/main.py` or the GitHub Actions workflow are required. Review 
 
 ### Changing Workflow Schedule
 - Edit `.github/workflows/watch.yml` → `schedule.cron`.
-- Default is twice per month at 01:17 UTC, on days 3 and 17 (`17 1 3,17 * *`).
+- Default is twice per month at 01:15 UTC, on days 3 and 17 (`15 1 3,17 * *`).
 
 ### Cache Corruption / Manual Reset
 - Simply delete `cached/dblp.yaml` (or remove specific topic keys).

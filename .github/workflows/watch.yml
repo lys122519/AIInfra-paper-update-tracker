@@ -10,7 +10,7 @@ on:
         default: true
   schedule:
     # Run on the original monthly date and again 14 days later.
-    - cron: '17 1 3,17 * *'
+    - cron: '15 1 3,17 * *'
 
 permissions:
   contents: write
