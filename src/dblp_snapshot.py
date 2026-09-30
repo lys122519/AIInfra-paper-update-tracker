@@ -295,11 +295,11 @@ def load_snapshot_items_by_topic(
         for query in queries
     }
     results = {topic: [] for topic in topics.values()}
-    prefix_queries = [
-        (prefix.rstrip("/") + "/", query)
+    query_by_key_prefix = {
+        prefix.rstrip("/"): query
         for query, prefix in query_key_prefixes.items()
         if query in queries
-    ]
+    }
 
     parser = etree.XMLPullParser(
         events=("end",),
@@ -319,7 +319,9 @@ def load_snapshot_items_by_topic(
             parser.feed(chunk)
             for _, element in parser.read_events():
                 key = element.get("key", "")
-                query = next((query for prefix, query in prefix_queries if key.startswith(prefix)), None)
+                key_parts = key.split("/", 2)
+                key_prefix = "/".join(key_parts[:2]) if len(key_parts) >= 2 else ""
+                query = query_by_key_prefix.get(key_prefix)
                 if query:
                     year_text = _element_text(element, "year")
                     try:
