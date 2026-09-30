@@ -132,3 +132,6 @@ dmypy.json
 # Cache backups
 cached/*.bak
 cached/abstract_progress.yaml
+
+# Local curation exports
+candidates.yaml

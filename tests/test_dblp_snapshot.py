@@ -14,6 +14,9 @@ from dblp_snapshot import load_snapshot_items_by_topic, title_matches_keyword  #
 from paper_filters import paper_passes_filters, title_matches_expression  # noqa: E402
 import utils  # noqa: E402
 
+sys.path.insert(0, str(ROOT / "scripts"))
+from curation import classify_paper, normalize_venue  # noqa: E402
+
 
 class DblpSnapshotTests(unittest.TestCase):
     def test_runtime_config_loader_preserves_colon_keys(self):
@@ -66,6 +69,14 @@ class DblpSnapshotTests(unittest.TestCase):
                 filters,
             )
         )
+
+    def test_curation_policy_normalizes_main_tracks_and_excludes_workshops(self):
+        self.assertEqual(normalize_venue("ACL (Findings)"), ("ACL", None))
+        self.assertEqual(normalize_venue("ASPLOS (2)"), ("ASPLOS", None))
+        self.assertEqual(normalize_venue("LREC/COLING"), ("COLING", None))
+        self.assertIsNone(normalize_venue("CVPR Workshops")[0])
+        self.assertIsNone(normalize_venue("SIGCOMM (Posters and Demos)")[0])
+        self.assertEqual(classify_paper("Fast RDMA Collective Communication"), "Distributed Communication and Networking")
 
     def test_streaming_parser_filters_year_venue_and_keyword(self):
         keywords = ["AI schedul", "RDMA", "Kubernetes"]

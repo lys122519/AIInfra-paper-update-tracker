@@ -39,6 +39,8 @@
 │   └── dblp.yaml                    # Persistent cache of already-reported papers
 ├── scripts/
 │   ├── convert_cache_to_md.py       # Converts cache to structured Markdown (domain-specific maps)
+│   ├── curation.py                  # Shared venue policy and curation categories
+│   ├── export_candidates.py         # Export Awesome-AIInfra review batches
 │   ├── fetch_abstracts.py           # Backfill/refresh paper abstracts via external APIs
 │   ├── fetch_dois.py                # Backfill missing DOIs via DBLP / Crossref / Semantic Scholar
 │   ├── sync_dblp_snapshot.py        # Discover, verify, and download official XML releases
@@ -137,6 +139,12 @@ dblp:
 - Both snapshot and legacy API modes apply the same rules before caching or enrichment.
 - After changing filter rules, run `python scripts/filter_cache.py --dry-run`, then `python scripts/filter_cache.py` and `python scripts/convert_cache_to_md.py` to update existing data.
 - **Agent Note**: Prefer positive context rules for broad keywords over long lists of application-domain exclusions. Add tests for every new filtering behavior.
+
+### 8. Awesome-AIInfra Curation Boundary
+- `AIInfra-Papers.md` is the automated candidate list; [Awesome-AIInfra](https://github.com/lys122519/Awesome-AIInfra) is the reviewed knowledge base.
+- `scripts/curation.py` includes main proceedings, Findings, and industry tracks while explicitly excluding workshops, demos, posters, tutorials, student tracks, companion volumes, and position papers.
+- `scripts/export_candidates.py` exports structured review batches. Records remain `reviewed: false` unless a human has checked relevance, metadata, and category placement.
+- Never push tracker candidates directly into Awesome-AIInfra without a reviewable pull request.
 
 ## Maintenance Notes
 

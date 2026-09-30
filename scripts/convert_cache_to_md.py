@@ -20,9 +20,10 @@ Quick checklist when switching domains:
 
 import yaml
 import urllib.parse
-import re
 from pathlib import Path
 from collections import defaultdict
+
+from curation import normalize_venue
 
 
 def main():
@@ -58,48 +59,6 @@ def main():
         f"{urllib.parse.quote(keyword, safe='')}%20{urllib.parse.quote(query, safe='')}"
         for keyword in keywords
         for query in queries
-    }
-
-    # Venue raw name -> display name
-    VENUE_MAP = {
-        # Systems journals
-        "IEEE Trans. Parallel Distrib. Syst.": "TPDS",
-        "IEEE Trans. Parallel Distributed Syst.": "TPDS",
-        "ACM Trans. Comput. Syst.": "TOCS",
-        "Trans. Assoc. Comput. Linguistics": "TACL",
-        "Transactions of the Association for Computational Linguistics": "TACL",
-        "Comput. Linguistics": "Computational Linguistics",
-        "Computational Linguistics": "Computational Linguistics",
-        "J. Mach. Learn. Res.": "JMLR",
-        "Journal of Machine Learning Research": "JMLR",
-        "IEEE Trans. Pattern Anal. Mach. Intell.": "TPAMI",
-        "IEEE Transactions on Pattern Analysis and Machine Intelligence": "TPAMI",
-        "ACM Trans. Inf. Syst.": "TOIS",
-        "ACM Transactions on Information Systems": "TOIS",
-        "IEEE Trans. Neural Networks Learn. Syst.": "TNNLS",
-        "IEEE Transactions on Neural Networks and Learning Systems": "TNNLS",
-        "Artif. Intell.": "AIJ",
-        "Artificial Intelligence": "AIJ",
-        "IEEE Trans. Knowl. Data Eng.": "TKDE",
-        "IEEE Transactions on Knowledge and Data Engineering": "TKDE",
-        # Conference aliases and co-located tracks
-        "USENIX Annual Technical Conference": "USENIX ATC",
-        "USENIX ATC": "USENIX ATC",
-        "Symposium on Cloud Computing": "SoCC",
-        "ACM Symposium on Cloud Computing": "SoCC",
-        "CrossCloud@EuroSys": "EuroSys",
-        "EdgeSys@EuroSys": "EuroSys",
-        "EuroMLSys@EuroSys": "EuroSys",
-        "Supercomputing": "SC",
-        "The Web Conference": "WWW",
-        "Web Conference": "WWW",
-    }
-
-    VENUE_FAMILY_PATTERNS = {
-        r"^ACL(?: \(\d+\))?$": "ACL",
-        r"^NAACL(?:-HLT)?(?: \(\d+\))?$": "NAACL",
-        r"^COLING(?: \(\d+\))?$": "COLING",
-        r"^ECCV(?: \(\d+\))?$": "ECCV",
     }
 
     # Display name -> category
@@ -177,6 +136,7 @@ def main():
     # Aggregate: category -> year -> venue -> [papers]
     aggregated = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
     unknown_venues = set()
+    excluded_venues = set()
 
     for topic, papers in data.items():
         if topic not in configured_topics:
@@ -188,12 +148,10 @@ def main():
             if not raw_venue:
                 continue
 
-            venue = VENUE_MAP.get(raw_venue, raw_venue)
-            if venue == raw_venue:
-                for pattern, display_name in VENUE_FAMILY_PATTERNS.items():
-                    if re.fullmatch(pattern, raw_venue):
-                        venue = display_name
-                        break
+            venue, exclusion_reason = normalize_venue(raw_venue)
+            if exclusion_reason:
+                excluded_venues.add(raw_venue)
+                continue
             category = CATEGORY_MAP.get(venue)
 
             if category is None:
@@ -211,6 +169,10 @@ def main():
     if unknown_venues:
         print("[WARN] Unknown venues (skipped):")
         for v in sorted(unknown_venues):
+            print(f"  - {v}")
+    if excluded_venues:
+        print("[INFO] Explicitly excluded secondary tracks:")
+        for v in sorted(excluded_venues):
             print(f"  - {v}")
 
     def is_low_priority(title: str) -> bool:

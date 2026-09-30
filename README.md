@@ -45,6 +45,14 @@ python scripts/filter_cache.py
 python scripts/convert_cache_to_md.py
 ```
 
+The curated output includes main proceedings, Findings, and industry tracks. Workshops, demos, posters, tutorials, student tracks, companion volumes, and position papers are explicitly excluded. To prepare a review batch for [Awesome-AIInfra](https://github.com/lys122519/Awesome-AIInfra):
+
+```bash
+python scripts/export_candidates.py --year 2025 --venue MLSys --venue OSDI --output candidates.yaml
+```
+
+Exports are marked unreviewed by default and must go through an Awesome-AIInfra pull request before publication.
+
 ## Run Locally
 
 ```bash
@@ -122,6 +130,8 @@ python main.py run --env=dev
 该方案遵循 DBLP 对批量访问的建议，不会自动处理或绕过交互式验证挑战。定时工作流改为每月运行，与快照发布节奏一致。
 
 过滤规则位于 `config.yaml` 的 `dblp.filters`。修改规则后，可运行 `python scripts/filter_cache.py` 清理已有缓存，再运行 `python scripts/convert_cache_to_md.py` 重新生成论文列表。
+
+正式候选列表收录主会、Findings 和 Industry Track；Workshop、Demo、Poster、Tutorial、Student Track、Companion Volume 和 Position Paper 会被明确排除。可通过 `scripts/export_candidates.py` 为 Awesome-AIInfra 生成待审核批次，导出内容默认不会被标记为已审核。
 
 去重和 Markdown 生成只读取当前配置对应的检索主题；切换研究范围时可以重置 `cached/dblp.yaml`，同时回收仓库空间。
 
