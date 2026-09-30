@@ -125,4 +125,8 @@ python main.py run --env=dev
 
 ## Acknowledgements / 致谢
 
-This project builds on [dblp-watcher](https://github.com/beiyuouo/dblp-watcher/). Publication metadata comes from the [official DBLP XML releases on DROPS](https://drops.dagstuhl.de/entities/collection/10.4230/dblp.xml).
+Special thanks to [youngfish42/FL-paper-update-tracker](https://github.com/youngfish42/FL-paper-update-tracker), which provided the original foundation and inspiration for this project.
+
+特别感谢 [youngfish42/FL-paper-update-tracker](https://github.com/youngfish42/FL-paper-update-tracker)，该项目为本项目提供了最初的基础与启发。
+
+This project also builds on [dblp-watcher](https://github.com/beiyuouo/dblp-watcher/). Publication metadata comes from the [official DBLP XML releases on DROPS](https://drops.dagstuhl.de/entities/collection/10.4230/dblp.xml).
