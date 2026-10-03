@@ -62929,6 +62929,33 @@ speculative%20decod%20venue%3AEMNLP%3A:
     EMNLP 2025. 2025.'
   abstract_cn: ''
   related_code: ''
+- author: Juntao Zhao, Wenhao Lu, Sheng Wang, Lingpeng Kong, Chuan Wu
+  title: 'QSpec: Speculative Decoding with Complementary Quantization Schemes.'
+  venue: EMNLP
+  year: '2025'
+  type: Conference and Workshop Papers
+  access: open
+  key: conf/emnlp/ZhaoLWKW25
+  doi: 10.18653/v1/2025.emnlp-main.240
+  ee: https://doi.org/10.18653/v1/2025.emnlp-main.240
+  url: https://dblp.org/rec/conf/emnlp/ZhaoLWKW25
+  abstract: 'Quantization is widely adopted to accelerate inference and reduce memory
+    consumption in large language models (LLMs). While activation-weight joint quantization
+    enables efficient low-precision decoding, it suffers from substantial performance
+    degradation on multi-step reasoning tasks. We propose QSpec, a novel quantization
+    paradigm that decouples efficiency from quality by integrating two complementary
+    schemes via speculative decoding: low-precision joint quantization for fast drafting
+    and high-precision weight-only quantization for accurate verification. QSpec reuses
+    both weights and KV cache across stages, enabling near-zero-cost switching without
+    retraining or auxiliary models. Compared to high-precision baselines, QSpec achieves
+    up to 1.64x speedup without quality degradation, and outperforms state-of-the-art
+    speculative decoding methods by up to 1.55x in batched settings. Furthermore,
+    QSpec supports plug-and-play deployment and generalizes well across model scales,
+    quantization methods, and workloads. These properties make QSpec a practical and
+    scalable solution for high-fidelity quantized LLM serving under memory-constrained
+    scenarios. Our code is available at https://github.com/hku-netexplo-lab/QSpec.'
+  abstract_cn: ''
+  related_code: https://github.com/hku-netexplo-lab/QSpec
 speculative%20decod%20venue%3ANAACL%3A:
 - author: Sukmin Cho, Sangjin Choi, Taeho Hwang, Jeongyeon Seo, Soyeong Jeong, Huije
     Lee, Hoyun Song, Jong C. Park, Youngjin Kwon

@@ -1679,6 +1679,7 @@
 - Primus: A Pioneering Collection of Open-Source Datasets for Cybersecurity LLM Training. [[PUB](https://doi.org/10.18653/v1/2025.emnlp-main.527)]
 - PRISM: Efficient Long-Range Reasoning With Short-Context LLMs. [[PUB](https://doi.org/10.18653/v1/2025.emnlp-main.517)]
 - PromptKeeper: Safeguarding System Prompts for LLMs. [[PUB](https://doi.org/10.18653/v1/2025.findings-emnlp.147)]
+- QSpec: Speculative Decoding with Complementary Quantization Schemes. [[PUB](https://doi.org/10.18653/v1/2025.emnlp-main.240)] [[CODE](https://github.com/hku-netexplo-lab/QSpec)]
 - RadialRouter: Structured Representation for Efficient and Robust Large Language Models Routing. [[PUB](https://doi.org/10.18653/v1/2025.findings-emnlp.787)]
 - Realistic Training Data Generation and Rule Enhanced Decoding in LLM for NameGuess. [[PUB](https://doi.org/10.18653/v1/2025.emnlp-main.357)]
 - Reasoning under Uncertainty: Efficient LLM Inference via Unsupervised Confidence Dilution and Convergent Adaptive Sampling. [[PUB](https://doi.org/10.18653/v1/2025.emnlp-main.1638)]
