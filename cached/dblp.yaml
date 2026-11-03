@@ -11577,7 +11577,20 @@ LLM%20inference%20venue%3AACL%3A:
   doi: 10.18653/v1/2026.acl-short.55
   ee: https://doi.org/10.18653/v1/2026.acl-short.55
   url: https://dblp.org/rec/conf/acl/RaiCB26
-  abstract: ''
+  abstract: Large language models (LLMs) are fluent but often brittle when interpretation
+    depends on external information (e.g., events or participant roles), as next-token
+    prediction does not explicitly encode situation-level semantic constraints.FrameNet
+    provides a structured account of semantics through its inventory of frames, roles,
+    and relations.We present a scalable framework that injects frame-semantic knowledge
+    into LLMs via LoRA, moving from fact-oriented prompting to principle-oriented
+    supervision over the full FrameNet inventory.The supervision encodes semantic
+    constraints through semantic types, sense-aware definitions, frame relations,
+    and role-annotated examples.To test whether this knowledge generalizes beyond
+    surface cues, we use Natural Language Inference (NLI) as a diagnostic task for
+    event-level reasoning.Experiments on CONFER and SNLI show consistent gains over
+    Meta-Llama-3.1-8B-Instruct in zero-shot and few-shot settings, especially for
+    entailment and contradiction.Complementary semantic role labeling analyses further
+    indicate improved sensitivity to frame, role, and span structure.
   abstract_cn: ''
   related_code: ''
 - author: Haoqi Yang 0001, Luohe Shi, Qiwei Li 0002, Zuchao Li, Ping Wang 0028, Hao
@@ -11909,7 +11922,22 @@ LLM%20inference%20venue%3AACL%3A:
   doi: 10.18653/v1/2026.findings-acl.1062
   ee: https://doi.org/10.18653/v1/2026.findings-acl.1062
   url: https://dblp.org/rec/conf/acl/LuoYWZL26
-  abstract: ''
+  abstract: Mixture-of-Experts (MoE) models offer a promising path for scaling model
+    capacity, yet their massive memory footprint poses significant challenges for
+    deployment on resourceconstrained edge devices.Existing solutions, such as static
+    pruning or dynamic offloading, often struggle to balance model accuracy with inference
+    latency due to irreversible information loss or prohibitive I/O overhead.In this
+    paper, we propose LightMoE, a novel framework for memory-efficient MoE inference
+    that exploits the inherent functional redundancy and temporal locality of expert
+    activation.LightMoE employs a frequency-aware expert initialization strategy to
+    retain a compact core of resident experts and introduces a similarity-based redirection
+    mechanism to compensate for missing experts without incurring I/O costs.Furthermore,
+    it incorporates a lightweight runtime manager that performs coarse-grained, task-level
+    expert replacement to adapt to shifting data distributions.Empirical evaluations
+    on representative edge platforms demonstrate that LightMoE achieves a superior
+    accuracy-efficiency tradeoff, improving average accuracy by 4.3% over static pruning
+    and 2.4% over dynamic swapping methods, while maintaining inference latency comparable
+    to strictly pruned models.
   abstract_cn: ''
   related_code: ''
 - author: Dongjie Yang, Xiaodong Han, Yan Gao 0017, Yao Hu 0002, Shilin Zhang, Hai
@@ -13144,7 +13172,19 @@ LLM%20inference%20venue%3AEACL%3A:
   doi: 10.18653/v1/2026.eacl-long.360
   ee: https://doi.org/10.18653/v1/2026.eacl-long.360
   url: https://dblp.org/rec/conf/eacl/BeethamCWHBS26
-  abstract: ''
+  abstract: Large language models (LLMs) are safety-aligned to prevent harmful response
+    generation, yet still remain vulnerable to jailbreak attacks. While prior works
+    have focused on improving jailbreak attack effectiveness, they offer little explanation
+    for why safety alignment fails. We address this gap by framing jailbreaks as inference-time
+    alignment, connecting attack design and safety alignment within a unified optimization
+    framework. This framing allows us to extend best-of-N inference-time alignment
+    to the adversarial setting, called LIAR ( L everaging I nference-time A lignment
+    to jailb R eak), and derive suboptimality bounds that show LIAR provably approaches
+    an optimal jailbreak as compute scales. Interestingly, our framework allows us
+    to develop the notion of a Safety-Net , a measure of how vulnerable an LLM is
+    to jailbreaks, which helps to explain why safety alignment can fail. Empirically,
+    LIAR produces natural, hard-to-detect prompts that achieve a competitive attack
+    success rate while running 10 to 100x faster than prior suffix-based jailbreaks.
   abstract_cn: ''
   related_code: ''
 LLM%20inference%20venue%3ACOLING%3A: []
@@ -22228,7 +22268,26 @@ LLM%20training%20venue%3AACL%3A:
   doi: 10.18653/v1/2026.acl-industry.90
   ee: https://doi.org/10.18653/v1/2026.acl-industry.90
   url: https://dblp.org/rec/conf/acl/ZhaoLQSMHXC26
-  abstract: ''
+  abstract: 'As a key medium for human interaction and information exchange, social
+    networking services (SNS) pose unique challenges for large language models (LLMs):
+    heterogeneous workloads, fast-shifting norms and slang, and multilingual, culturally
+    diverse corpora that induce sharp distribution shift. Supervised fine-tuning (SFT)
+    can specialize models but often triggers a ``seesaw'''' between in-distribution
+    gains and out-of-distribution robustness, especially for smaller models. To address
+    these challenges, we introduce RedOne 2.0, an SNS-oriented LLM trained with a
+    progressive, RL-prioritized post-training paradigm designed for rapid and stable
+    adaptation. The pipeline consist in three stages: (1) Exploratory Learning on
+    curated SNS corpora to establish initial alignment and identify systematic weaknesses;
+    (2) Targeted Fine-Tuning that selectively applies SFT to the diagnosed gaps while
+    mixing a small fraction of general data to mitigate forgetting; and (3) Refinement
+    Learning that re-applies RL with SNS-centric signals to consolidate improvements
+    and harmonize trade-offs across tasks. Across various tasks spanning three categories,
+    our 4B scale model delivers an average improvements about 2.41 over the 7B sub-optimal
+    baseline. Additionally, RedOne 2.0 achieves average performance lift about 8.74
+    from the base model with less than half the data required by SFT-centric method
+    RedOne, evidencing superior data efficiency and stability at compact scales. Overall,
+    RedOne 2.0 establishes a competitive, cost-effective baseline for domain-specific
+    LLMs in SNS scenario, advancing capability without sacrificing robustness.'
   abstract_cn: ''
   related_code: ''
 - author: Zhihao Lin, Ziqi Zhu, Hao Huang, Guanghui Wang 0016, Peiyang He
@@ -23521,7 +23580,22 @@ LLM%20training%20venue%3AACL%3A:
   doi: 10.18653/v1/2026.findings-acl.2029
   ee: https://doi.org/10.18653/v1/2026.findings-acl.2029
   url: https://dblp.org/rec/conf/acl/ZhaoHWX26
-  abstract: ''
+  abstract: 'Large language models (LLMs) are increasingly used as judges to evaluate,
+    rank, and supervise other models, yet their reliability in judging LLMs'' reasoning
+    process under longcontext settings remains underexplored.Existing benchmarks either
+    overly rely on human annotators, who may miss subtle flaws in lengthy reasoning
+    chains, or focus solely on final responses while ignoring the underlying context
+    and reasoning process.We introduce Long-Reason Bench (LRBENCH), a largescale benchmark
+    for evaluating LLM-based judges.LRBENCH comprises over 100K annotated instances
+    spanning medical, legal, and academic-review scenarios, with fine-grained labels
+    indicating violations of six core principles: Logical Correctness, Factual Consistency,
+    Bias and Fairness, Groundedness, Helpfulness, and Harmlessness.Experimental results
+    reveal that state-of-the-art LLM judges struggle to identify nuanced reasoning
+    errors in long contexts.To improve judge reliability, we further present Judge-R1,
+    which combines reinforcement learning with multi-turn search to enable grounded
+    and principle-aware evaluation.Across domains and principles, Judge-R1 consistently
+    outperforms single-turn baselines, enabling scalable and trustworthy evaluation
+    of LLM reasoning.Our dataset and code are available at https://github.com/ Xinyi-0724/Judge-R1.'
   abstract_cn: ''
   related_code: ''
 - author: Kinjal Basu 0002, Ibrahim Abdelaziz, Subhajit Chaudhury, Soham Dan, Maxwell
@@ -23553,7 +23627,25 @@ LLM%20training%20venue%3AACL%3A:
   doi: 10.18653/v1/2026.findings-acl.462
   ee: https://doi.org/10.18653/v1/2026.findings-acl.462
   url: https://dblp.org/rec/conf/acl/AcikgozQJHT26
-  abstract: ''
+  abstract: 'One paradigm of language model (LM) finetuning relies on creating large
+    training datasets, under the assumption that high quantity and diversity will
+    enable models to generalize to novel tasks after post-training.In practice, gathering
+    large sets of data is inefficient, and training on them is prohibitively expensive;
+    worse, there is no guarantee that the resulting model will handle complex scenarios
+    or generalize better.Moreover, existing techniques rarely assess whether a training
+    sample provides novel information, resulting in unnecessary costs.In this work,
+    we explore a new Test-Time Self-Improvement (TT-SI) algorithm to create more effective
+    and generalizable agentic LMs on-the-fly.TT-SI can be summarized in three steps:
+    (i) first it identifies the samples that model struggles with (self-awareness),
+    (ii) then generates similar examples from detected uncertain samples (self-data
+    augmentation), and (iii) uses these newly generated samples at testtime training
+    (self-improvement).We further explore Test-Time Distillation (TT-D), which leverages
+    a stronger supervisor for targeted data generation.Empirical evaluations across
+    different agent benchmarks demonstrate that TT-SI improves the performance with
+    +5.48% absolute accuracy gain on average across all benchmarks and surpasses other
+    standard learning methods more efficiently.Our findings highlight the promise
+    of TT-SI, demonstrating the potential of self-improvement algorithms at test-time
+    as a new paradigm for building more capable agents toward self-evolution.'
   abstract_cn: ''
   related_code: ''
 - author: Bingguang Hao, Zengzhuang Xu, Maolin Wang 0001, Yuntao Wen, Yicheng Chen
@@ -23569,7 +23661,9 @@ LLM%20training%20venue%3AACL%3A:
   doi: 10.18653/v1/2026.findings-acl.900
   ee: https://doi.org/10.18653/v1/2026.findings-acl.900
   url: https://dblp.org/rec/conf/acl/HaoXWWCPCZGZZ26
-  abstract: ''
+  abstract: 'Bingguang Hao, Zengzhuang Xu, Maolin Wang, Yuntao Wen, Yicheng Chen,
+    Cunyin Peng, Long Chen, Xiangyu Zhao, Jinjie Gu, Chenyi Zhuang, Ji Zhang. Findings
+    of the Association for Computational Linguistics: ACL 2026. 2026.'
   abstract_cn: ''
   related_code: ''
 - author: Lina Sun
@@ -25003,7 +25097,19 @@ LLM%20training%20venue%3AEACL%3A:
   doi: 10.18653/v1/2026.findings-eacl.213
   ee: https://doi.org/10.18653/v1/2026.findings-eacl.213
   url: https://dblp.org/rec/conf/eacl/NakamuraKLKK26
-  abstract: ''
+  abstract: 'We investigate self-training of large language models (LLMs), in which
+    models are recursively trained on their own generated text.Prior studies have
+    reported conflicting outcomes in this setting: some find evidence of performance
+    gains (i.e., self-improvement), while others observe performance degradation (i.e.,
+    model collapse).To clarify this discrepancy, we use the OLMo-2 models as non-toy
+    LLMs and perform multiple rounds of continual pre-training using self-generated
+    text with varying data synthesis and filtering strategies.Our experiments show
+    that naive self-training does not improve either perplexity on the original pre-training
+    corpus nor downstream task performance, regardless of model size.These results
+    suggest that model collapse observed in naive self-training is inherent to the
+    training procedure, while selfimprovement likely owes its success not to the model''s
+    autonomous refinement but to humandesigned, strategic synthetic pipelines that
+    inject external intelligence.'
   abstract_cn: ''
   related_code: ''
 - author: Runzhe Wu, Ankur Samanta, Ayush Jain, Scott Fujimoto, Jeongyeol Kwon, Ben
@@ -25058,7 +25164,20 @@ LLM%20training%20venue%3AEACL%3A:
   doi: 10.18653/v1/2026.findings-eacl.351
   ee: https://doi.org/10.18653/v1/2026.findings-eacl.351
   url: https://dblp.org/rec/conf/eacl/ChristA26
-  abstract: ''
+  abstract: Large Language Models (LLMs) have been frequently used as automatic annotators
+    for tasks such as Text Emotion Recognition (TER).We consider a scenario in which
+    annotators assign at least one emotion label from a large set of options to a
+    text snippet.For this emotion tagging task, we propose a novel zero-shot algorithm
+    that leverages Best-Worst Scaling (BWS), prompting the LLM to choose the least
+    and most suitable emotions for a given text from several label subsets.The LLM's
+    choices can be represented by a graph linking labels via worse-than relations.Random
+    walks on this graph yield the final score for each label.We compare our algorithm
+    with naive prompting approaches as well as an established BWSbased method.Extensive
+    experiments demonstrate the suitability of the method.It proves to compare favorably
+    to the benchmarks in terms of both accuracy and calibration with respect to human
+    annotations.Moreover, our algorithm's automatic annotations are shown to be suitable
+    for finetuning lightweight emotion classification models.The proposed method consumes
+    considerably fewer computational resources than the established BWS approach.
   abstract_cn: ''
   related_code: ''
 - author: Jeffrey Li, Joshua P. Gardner, Doug Kang, Fangping Shi, Karanjeet Singh
@@ -27237,7 +27356,22 @@ LLM%20serving%20venue%3AACL%3A:
   doi: 10.18653/v1/2026.findings-acl.1888
   ee: https://doi.org/10.18653/v1/2026.findings-acl.1888
   url: https://dblp.org/rec/conf/acl/LiuZKZ26
-  abstract: ''
+  abstract: Large Language Model (LLM) serving systems increasingly face strict time-to-first-token
+    (TTFT) service-level objectives (SLOs), yet TTFT remains highly sensitive to router-side
+    queueing effects.Prefill costs scale with prompt length, decode lengths are uncertain,
+    and prefix locality creates strong performance skew across requests.Despite major
+    advances in continuous batching and KV-cache management, today's routers are often
+    agnostic to request size, which makes them vulnerable to head-of-line blocking
+    and tail-latency amplification under mixed workloads.We propose QUARTZ, a quantile-aware
+    routing and queueing layer for LLM serving that predicts servicetime quantiles,
+    rather than point estimates, using lightweight, router-visible features such as
+    prompt length, cache-hit signals, and decoding parameters.QUARTZ uses these quantiles
+    to route each request to the worker that minimizes predicted tail completion,
+    and to prioritize admission and queueing decisions to satisfy TTFT SLOs while
+    preserving fairness.We implement QUARTZ as a router upgrade for SGLang and evaluate
+    it on representative interactive and retrieval-augmented workloads.The results
+    show consistent reductions in TTFT tail latency and SLO violations across heterogeneous
+    workloads.
   abstract_cn: ''
   related_code: ''
 - author: Yujia Fu, Heming Zhong, Dan Huang 0001, Yutong Lu
@@ -30840,7 +30974,26 @@ LLM%20system%20venue%3AACL%3A:
   doi: 10.18653/v1/2026.findings-acl.1348
   ee: https://doi.org/10.18653/v1/2026.findings-acl.1348
   url: https://dblp.org/rec/conf/acl/KhanZTFC26
-  abstract: ''
+  abstract: 'While Large Language Model (LLM) safety has focused on single-agent,
+    white-box settings, the adoption of Multi-Agent Systems (MAS) creates a critical
+    blind spot: supply chain vulnerabilities in MAS ecosystems.These systems often
+    rely on third-party agents accessed via black-box APIs, creating risks where attackers
+    can embed hidden triggers to manipulate collective reasoning or outputs.Because
+    internal weights are inaccessible, traditional white-box defenses fail to detect
+    these threats.Consequently, a critical gap exists in auditing these systems for
+    "Trojan" agents, i.e., malicious models that behave normally until triggered by
+    specific, often multi-turn, conversational contexts.To bridge this gap, we introduce
+    the Conversational Trojan Unmasking System (CTUS), a black-box auditing framework
+    that leverages an Evolutionary Algorithm (EA) to autonomously expose hidden threats.Drawing
+    on social deduction mechanics, CTUS deploys a "Judge" agent to evolve conversational
+    probes that provoke Trojan agents into revealing their malicious nature without
+    alerting benign peers.We validate CTUS across diverse architectures (Llama-2/3,
+    Gemma, Mistral) and attack vectors (word, syntax, semantic, RLHF).Our results
+    demonstrate that CTUS achieves superior detection rates (up to 100% in specific
+    configurations).Furthermore, we conduct rigorous analyses to confirm the framework''s
+    robustness, exhibiting negligible false positives on benign systems and stability
+    across system configurations, establishing CTUS as a scalable safeguard for the
+    multi-agent landscape.'
   abstract_cn: ''
   related_code: ''
 - author: Zonghai Yao, Hong Yu 0001
@@ -41741,7 +41894,23 @@ efficient%20language%20model%20venue%3AACL%3A:
   doi: 10.18653/v1/2026.findings-acl.1572
   ee: https://doi.org/10.18653/v1/2026.findings-acl.1572
   url: https://dblp.org/rec/conf/acl/QiHZZSHJCZ26
-  abstract: ''
+  abstract: Large language models (LLMs) often hallucinate in question answering (QA)
+    tasks due to a lack of factual knowledge.While integrating knowledge graphs (KGs)
+    with LLMs has alleviated this issue, existing methods suffer from poor generalization
+    or low reasoning efficiency, and critically, they overlook the learning and reuse
+    of reasoning paths from past experiences.To address these challenges, we introduce
+    Thought-Action Graph (TAG), a structured repository of reasoning experiences.TAG
+    decomposes successful LLM-KG interaction trajectories into fine-grained semantic
+    operators, which are stored in TAG constructed by the thought layer and action
+    layer.Building upon TAG, we propose a novel KGQA paradigm -TAG-Reasoning (TAGR).TAGR
+    first retrieves and assembles reasoning blueprints from TAG, and then guides LLMs
+    to efficiently execute on KG according to them.Through this approach, TAGR transforms
+    the computationally expensive online exploration process of LLMs into an offline
+    process of TAG retrieval and assembly.Experimental results on multiple KGQA benchmarks
+    demonstrate that TAGR significantly outperforms state-of-theart methods across
+    key metrics, while drastically reducing the number of LLM calls and generated
+    tokens.This work † opens new avenues for building continual learning, efficient,
+    and faithful KGQA systems.
   abstract_cn: ''
   related_code: ''
 - author: Victor Morand, Nadi Tomeh, Josiane Mothe, Benjamin Piwowarski
@@ -43034,7 +43203,22 @@ efficient%20language%20model%20venue%3AACL%3A:
   doi: 10.18653/v1/2026.acl-long.819
   ee: https://doi.org/10.18653/v1/2026.acl-long.819
   url: https://dblp.org/rec/conf/acl/LiGWLLY26
-  abstract: ''
+  abstract: Diffusion language models (DLMs) have emerged as a powerful non-autoregressive
+    alternative to GPT-style sequential generation, but suffer from substantial computational
+    overhead due to their iterative parallel denoising.Existing acceleration works
+    cannot accurately detect semantically stabilized tokens and then skip computation,
+    leading to sub-optimal speedup in practice.This paper presents the first systematic
+    study of convergence dynamics in DLMs.Innovative observations include the misalignment
+    between traditionally used scalar detection criterion and the semantic convergence,
+    and the post-peak confidence score, that wastes denoising computation and degrades
+    inference quality.To address these limitations, we propose Ada-DLM, a semantic-aware
+    adaptive denoising framework that encodes the trajectory of scalar confidence
+    scores into an evolutionaware feature vector and then clusters vectors proactively
+    to adaptively identify semantically converged tokens.Furthermore, we incorporate
+    system-level optimizations to maximize runtime efficiency.Experiments show that
+    Ada-DLM consistently outperforms the SOTA competitor, achieving up to 2× speedup
+    and 19% quality improvement.That offers a practical path toward efficient high-quality
+    DLM deployment.
   abstract_cn: ''
   related_code: ''
 - author: Zhiyuan Hu, Yuliang Liu, Jinman Zhao, Suyuchen Wang, WangYan WangYan, Wei
@@ -47057,7 +47241,30 @@ efficient%20language%20model%20venue%3AEACL%3A:
   doi: 10.18653/v1/2026.findings-eacl.300
   ee: https://doi.org/10.18653/v1/2026.findings-eacl.300
   url: https://dblp.org/rec/conf/eacl/Rafiuddin26
-  abstract: ''
+  abstract: We propose MASKLORA, a plug-and-play masking mechanism that turns PEFT's
+    lowrank subspace into a faithful, compute-aware token selector.Instead of relying
+    on attention entropy or gradients, MASKLORA scores tokens by the LoRA-induced
+    representation shift and learns differentiable gates with an objective combining
+    task loss, expected L 0 sparsity, prediction consistency (KL), and a subspace
+    concentration term.We provide a bound showing the KL between full and masked predictions
+    is controlled by the sum of dropped scores, implying top-k selection minimizes
+    the bound.Across encoders on GLUE and SQuAD, MASKLORA matches full-model accuracy
+    while yielding 1.3-2.6×end-to-end speedups; on long-context NarrativeQA/GovReport
+    it attains 1.5-3.6×with small but nonzero degradation (e.g., ≤ 0.4 at ρ=70%, up
+    to ∼ 1.2 at ρ=50%, and up to ∼ 2.5 at ρ≈30%).Faithfulness improves over strong
+    baselines (sufficiency 99.2%, necessity 59.3%, lower KL at ρ=50%), and energy
+    falls accordingly (GPU Joules-per-correct 3.28 → 1.34 at ρ ≈ 30%).The method is
+    KV-cache compatible, rank-and budget-controllable, and robust under OOD stress
+    (HANS, adversarial sentiment, noisy SQuAD; at moderate budgets (ρ ≈ 50%) ≤ 0.9
+    abs.drop at matched budgets).Qualitative analyses show layer-wise retention concentrating
+    at semantic bottlenecks and class-separated ∆h i embeddings.MASKLORA offers accuracymatched
+    speedups with interpretable rationales and practical deployment hooks.hidden/attn
+    streams h,α and LoRA Δθ ⇒ compute Δhi,ℓ,Δαi,ℓ.normalized, aggregated scores s^i
+    ⇒ drive gate logits/selection.soft gates m~ (Hard-Concrete), budget ρ ⇒ loss terms
+    use masked input.full forward f(x;θ+Δθ) ⇒ KL "teacher" logits.gradients ⇒ update
+    LoRA params Δθ. gradients & calibration ⇒ update gate params ϕ, set threshold
+    κ←F-1(1-ρ).scores s^i ⇒ hard mask m via threshold/top-k.hard mask m ⇒ kept-token
+    set S. run f(x⊙m;θ+Δθ) with KVcache compaction ⇒ y^, logits, speedups.
   abstract_cn: ''
   related_code: ''
 - author: Tiejin Chen, Kaishen Wang, Hua Wei 0001
@@ -53478,7 +53685,19 @@ model%20compression%20venue%3AEACL%3A:
   doi: 10.18653/v1/2026.eacl-srw.16
   ee: https://doi.org/10.18653/v1/2026.eacl-srw.16
   url: https://dblp.org/rec/conf/eacl/HaddadiT26
-  abstract: ''
+  abstract: This work evaluates the non-English and unstructured text compression
+    performance of Large Language Models (LLMs) by comparing them with traditional
+    baselines on datasets from eight most widely spoken languages.Experimental results
+    show that the evaluated LLM (LLaMA-3.2-1B)was considerably outperformed by the
+    baselines, particularly on non-English datasets, where its performance relative
+    to the best baseline was more than three times worse than on English datasets
+    on average.It also compressed unstructured English data up to more than twofold
+    less effectively than plain English data.Traditional methods, however, remained
+    largely dataset-agnostic.Surprisingly, the LLM achieved worse compression ratios
+    on some datasets than others despite modeling them more accurately.Overall, the
+    outcomes and substantially higher compression time and resource consumption indicate
+    that current LLMs are highly impractical for the compression task, where traditional
+    methods continue to excel.Codes are available at github.com/mehranhaddadi13/llm_compress.
   abstract_cn: ''
   related_code: ''
 - author: Chen Zhang 0020, Yang Yang 0129, Qifan Wang 0001, Jiahao Liu, Jingang Wang,
@@ -54660,7 +54879,29 @@ model%20compression%20venue%3AECCV%3A:
   doi: 10.1007/978-3-032-37035-8_16
   ee: https://doi.org/10.1007/978-3-032-37035-8_16
   url: https://dblp.org/rec/conf/eccv/WangKBHJHL26
-  abstract: ''
+  abstract: Vision-Language Models (VLMs) incur substantial computational overhead
+    and inference latency due to the large number of vision tokens introduced by high-resolution
+    image and video inputs. Existing parameter-free token compression methods typically
+    rely on token selection or merging, yet they risk discarding substantial visual
+    information or distorting the original representation distribution, resulting
+    in pronounced performance degradation at high compression ratios. In response,
+    we aim to explore a more effective and efficient visual token compression strategy,
+    with a promising direction in the frequency domain. Motivated by the success of
+    frequency-domain transforms in image compression (e.g., JPEG), we systematically
+    analyze the frequency redundancy in visual representations and uncover a non-uniform
+    distribution of semantic information across frequency bands. Building upon this,
+    we introduce Fourier Compressor, an effective, parameter-free, and highly generalizable
+    module that removes redundancy from visual representations within the frequency
+    domain. Implemented via FFT with $\mathcal{O}(n^2 \log n)$ complexity and no additional
+    parameters, Fourier Compressor introduces negligible computational overhead while
+    preserving semantic fidelity. Extensive experiments on image-based benchmarks
+    demonstrate that our method achieves a favorable performance-efficiency trade-off,
+    retaining over 96% of the original accuracy while reducing inference FLOPs by
+    up to 83.8% and boosting generation speed by 31.2%. It consistently outperforms
+    existing parameter-free methods and even surpasses some parameterized approaches.
+    Importantly, Fourier Compressor generalizes consistently across both LLaVA and
+    Qwen-VL architectures, and further extends to video understanding tasks, highlighting
+    its practical applicability for efficient VLMs.
   abstract_cn: ''
   related_code: ''
 - author: Yuqi Zhang, Cheng Chen, Yuyu Guo 0001, Wenjie Yang, Lingchen Meng, Peng
@@ -59764,7 +60005,9 @@ quantization%20venue%3AACL%3A:
   doi: 10.18653/v1/2026.acl-long.403
   ee: https://doi.org/10.18653/v1/2026.acl-long.403
   url: https://dblp.org/rec/conf/acl/ZhouDKMXLH26
-  abstract: ''
+  abstract: 'Zixuan Zhou, Yujun Diao, Zicheng Kong, Dehua Ma, Zhenbo Xu, Pei Pei Li,
+    Zhaofeng He. Proceedings of the 64th Annual Meeting of the Association for Computational
+    Linguistics (Volume 1: Long Papers). 2026.'
   abstract_cn: ''
   related_code: ''
 - author: He Xiao, Qingyao Yang, Dirui Xie, Wendong Xu, Zunhai Su, Runming Yang, Haobo
@@ -66717,7 +66960,19 @@ speculative%20decod%20venue%3AACL%3A:
   doi: 10.18653/v1/2026.findings-acl.1065
   ee: https://doi.org/10.18653/v1/2026.findings-acl.1065
   url: https://dblp.org/rec/conf/acl/WangHXZYQ26
-  abstract: ''
+  abstract: 'Speculative decoding (SPD) has emerged as a promising technique to accelerate
+    Large Language Model (LLM) inference.However, current approaches typically enforce
+    a uniform verification standard, neglecting the inherent heterogeneity of natural
+    language and failing to distinguish between semantically-rich content and structurally-predictable
+    syntax.In this paper, we propose LinguaSpec, a training-free framework that leverages
+    linguistic priors to enable adaptive drafting and verification.Specifically, we
+    introduce: (1) a Static Linguistic Probe (SLP) to categorize tokens with zero
+    latency; (2) Syntactic Normalized Surprisal (SNS) to calibrate uncertainty against
+    categoryspecific entropy; and (3) a dual strategy of Syntactically-Guided Elastic
+    Expansion and POS-Adaptive Deferred Verification to dynamically adjust drafting
+    depth and verification rigor.By balancing semantic integrity with structural efficiency,
+    LinguaSpec significantly accelerates inference without requiring additional training.Experimental
+    results demonstrate its superior performance across diverse benchmarks.'
   abstract_cn: ''
   related_code: ''
 - author: Zining Liu, Yunhai Hu, Tianhua Xia, B. O. Bao, Eric Sather, Vithursan Thangarasa,
@@ -69099,7 +69354,22 @@ KV%20cache%20venue%3AACL%3A:
   doi: 10.18653/v1/2026.acl-long.417
   ee: https://doi.org/10.18653/v1/2026.acl-long.417
   url: https://dblp.org/rec/conf/acl/ChenZGLJZL26
-  abstract: ''
+  abstract: Large Language Models (LLMs) face significant memory and latency overheads
+    during inference due to KV cache grows with the context length. This issue is
+    especially pronouced in Knowledge Base Question Answering (KBQA) settings that
+    require support for multiple down-stream queries. Query-aware eviction meth-ods
+    do not generalize across queries, while existing query-agnostic approaches rely
+    on a single proxy query, leading to fragile eviction decisions under high eviction
+    ratios. We pro-pose ContrastKV , a robust query-agnostic KV cache eviction algorithm
+    for multi-query generalization . ContrastKV introduces a contrastive signal fusion
+    mechanism that jointly exploits complementary semantic and structural signals.
+    By contrasting semantic consistency with structural robustness, the method constructs
+    a more reliable eviction criterion that alleviates the blind spots of single-query
+    proxies. The framework integrates efficient signal generation, parallel importance
+    scoring, and multi-level fusion across heads and layers. Experiments show that
+    ContrastKV outperforms state-of-the-art meth-ods, retaining up to 92% accuracy
+    with only 20% of the KV cache budget, while reducing decoding latency by approximately
+    50% and significantly lowering GPU memory usage.
   abstract_cn: ''
   related_code: ''
 - author: Jie Ou, Jinyu Guo, Shiyao Guo, Yuang Li, Ruiqi Wu, Zhaokun Wang, Wenyi Li,
@@ -74224,7 +74494,22 @@ mixture%20of%20experts%20venue%3AECCV%3A:
   doi: 10.1007/978-3-032-37261-1_17
   ee: https://doi.org/10.1007/978-3-032-37261-1_17
   url: https://dblp.org/rec/conf/eccv/TaSSY26
-  abstract: ''
+  abstract: Learned image compression (LIC) is bottlenecked by the need to store independent
+    models for each rate-distortion operating point. Existing variable bit-rate (VBR)
+    methods aim to reduce this overhead via dense parameter modulation, but forcing
+    a shared backbone to approximate divergent mappings causes severe feature entanglement.
+    Specifically, low-rate smoothing gradients inherently conflict with the preservation
+    of high-frequency textural details, leading to sub-optimal performance. To resolve
+    this, we propose MixCompress, a unified VBR framework based on sparse structural
+    specialization. While sparsely gated Mixture-of-Experts (MoE) routing successfully
+    mitigates gradient conflict, it operates on a fixed computational budget. To address
+    the increased representational demands of higher bit-rates we introduce a Mixture-of-Depths
+    (MoD) extension to dynamically scale model capacity. Combined with Conditional
+    Auxiliary Transforms (CAT) for dynamic sub-band energy modulation, our hierarchical
+    framework effectively dynamically scales capacity. Extensive evaluations demonstrate
+    that MixCompress not only matches individually optimized single-rate baselines
+    but can even surpass them, establishing a new Pareto frontier for computationally
+    efficient image coding.
   abstract_cn: ''
   related_code: ''
 mixture%20of%20experts%20venue%3AOSDI%3A: []
@@ -77553,7 +77838,22 @@ long%20context%20venue%3AACL%3A:
   doi: 10.18653/v1/2026.acl-long.1199
   ee: https://doi.org/10.18653/v1/2026.acl-long.1199
   url: https://dblp.org/rec/conf/acl/LiuWWZXLYYWY26
-  abstract: ''
+  abstract: 'The quadratic complexity of attention mechanisms poses a critical bottleneck
+    for large language models processing long contexts.While dynamic sparse attention
+    methods offer input-adaptive efficiency, they face fundamental trade-offs: requiring
+    preprocessing, lacking global evaluation, violating query independence, or incurring
+    high computational overhead.We present RRAttention, a novel dynamic sparse attention
+    method that simultaneously achieves all desirable properties through a head round-robin
+    (RR) sampling strategy.By rotating query sampling positions across attention heads
+    within each stride, RRAttention maintains query independence while enabling efficient
+    global pattern discovery with stride-level aggregation.Our method reduces complexity
+    from O(L 2 ) to O(L 2 /S 2 ) and employs adaptive Top-τ selection for optimal
+    sparsity.Extensive experiments on natural language understanding (HELMET) and
+    multimodal video comprehension (Video-MME) demonstrate that RRAttention recovers
+    over 99% of full attention performance while computing only half of the attention
+    blocks, achieving 2.4× speedup at 128K context length and outperforming existing
+    dynamic sparse attention methods.The code is available at https: //github.com/PaddlePaddle/PaddleFleet(see
+    Research/RRAttention).'
   abstract_cn: ''
   related_code: ''
 - author: Bowen Cao, Deng Cai 0002, Wai Lam
@@ -79682,7 +79982,22 @@ long%20context%20venue%3AEACL%3A:
   doi: 10.18653/v1/2026.findings-eacl.189
   ee: https://doi.org/10.18653/v1/2026.findings-eacl.189
   url: https://dblp.org/rec/conf/eacl/QingDMHV26
-  abstract: ''
+  abstract: Multi-hop reasoning over long contexts remains challenging, as it requires
+    integrating relevant contexts scattered across distant sources while resisting
+    semantic drift and noise from distracting content.While retrieval-augmented generation
+    (RAG) has emerged as the prevailing solution, most RAG approaches encode and store
+    context in monolithic memory representations, resulting in noisy retrieval and
+    brittle reasoning.To overcome these limitations, we introduce TAG (Tailoring Memory
+    Granularity), a framework that prestructures memory into diverse granularities
+    and employs a rewardguided navigator to adaptively compose hybrid memory tailored
+    to each query.The navigator is trained with a multi-objective Bradley-Terry loss
+    that learns the relative utility of different memory types, enabling dynamic routing
+    across granularities.This design allows RAG systems to balance fine-grained detail
+    with high-level abstraction, yielding more reliable reasoning.Extensive experiments
+    on longcontext multi-hop question answering (QA) benchmarks show that TAG achieves
+    state-ofthe-art performance.With only 0.033% additional parameters, it remains
+    lightweight, highlighting its practicality as a scalable and effective solution
+    for enhancing language model agents in complex, real-world scenarios.
   abstract_cn: ''
   related_code: ''
 - author: Francesco Molfese 0001, Andrei Stefan Bejgu, Simone Tedeschi, Simone Conia,
