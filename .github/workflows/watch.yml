@@ -9,8 +9,9 @@ on:
         type: boolean
         default: true
   schedule:
-    # Run on the original monthly date and again 14 days later.
-    - cron: '15 1 3,17 * *'
+    # DBLP publishes its monthly snapshot on days 1-5 (e.g. Nov 3 09:01 UTC,
+    # Oct 5 08:22 UTC), so run on day 6 to pick it up, then again 14 days later.
+    - cron: '15 1 6,20 * *'
 
 permissions:
   contents: write
