@@ -71,12 +71,6 @@ jobs:
         run: |
           cd src && python main.py run --env=${{ env.RUN_ENV }}
 
-      - name: Extract related code links
-        if: ${{ github.event_name != 'workflow_dispatch' || !inputs.smoke_test }}
-        run: |
-          python scripts/fetch_related_code.py
-        continue-on-error: true
-
       - name: Fetch missing abstracts
         if: ${{ github.event_name != 'workflow_dispatch' || !inputs.smoke_test }}
         run: |

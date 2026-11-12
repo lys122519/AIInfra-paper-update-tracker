@@ -1,7 +1,7 @@
 import sys
 import unittest
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -12,45 +12,44 @@ import utils  # noqa: E402
 
 
 class SmokeModeTests(unittest.TestCase):
-    def test_html_verification_page_fails_without_retrying(self):
-        response = Mock(
-            status_code=200,
-            headers={"Content-Type": "text/html; charset=utf-8"},
-            text="<!doctype html><title>Making sure you're not a bot!</title>",
-        )
-        response.raise_for_status.return_value = None
-
-        with patch.object(utils.requests, "get", return_value=response) as get, patch.object(
-            utils.time, "sleep"
-        ):
-            self.assertIsNone(utils.request_data("https://example.invalid", retry=10))
-
-        get.assert_called_once()
-
-    def test_strict_smoke_mode_raises_on_request_failure(self):
+    def test_removed_api_source_is_rejected(self):
         config = {
             "cache_path": ROOT / "tests" / "_unused_cache",
             "dblp": {
                 "source": "api",
-                "url": "https://dblp.org/search/publ/api?q={}&format=json&h=1000",
                 "keywords": ["AI infrastructure"],
                 "queries": ["venue:MLSys:"],
                 "mails": [],
             },
         }
-        with patch.object(main, "init", return_value=config), patch.object(
-            main, "request_data", return_value=None
-        ):
-            with self.assertRaisesRegex(RuntimeError, "DBLP request failed"):
-                main.Scaffold().run(
-                    env="dev",
-                    keyword_limit=1,
-                    query_limit=1,
-                    max_results=10,
-                    dry_run=True,
-                    skip_enrichment=True,
-                    fail_on_request_error=True,
-                )
+        with patch.object(main, "init", return_value=config):
+            with self.assertRaisesRegex(ValueError, "only `snapshot` is supported"):
+                main.Scaffold().run(env="dev", dry_run=True, skip_enrichment=True)
+
+    def test_configured_keywords_support_legacy_and_string_forms(self):
+        self.assertEqual(
+            utils.get_configured_keywords({"dblp": {"keywords": [" a ", "", None, "b"]}}),
+            ["a", "b"],
+        )
+        self.assertEqual(utils.get_configured_keywords({"dblp": {"keywords": "solo"}}), ["solo"])
+        self.assertEqual(utils.get_configured_keywords({"dblp": {"keyword": "legacy"}}), ["legacy"])
+        self.assertEqual(utils.get_configured_keywords({"dblp": {}}), [])
+        self.assertEqual(
+            utils.get_configured_topics({"dblp": {"keyword": "AI infra", "queries": ["venue:MLSys:"]}}),
+            {"AI%20infra%20venue%3AMLSys%3A"},
+        )
+
+    def test_get_msg_uses_escaped_newlines_for_github_env(self):
+        items = [
+            {"title": "Paper A", "ee": "https://doi.org/10.1/a", "related_code": "https://github.com/u/r"},
+            {"title": "Paper B", "ee": ""},
+        ]
+        msg = utils.get_msg(items, "AI%20infrastructure%20venue%3AMLSys%3A")
+        self.assertNotIn("\n", msg)
+        self.assertTrue(msg.startswith("## [MLSys](https://dblp.org/search?q="))
+        self.assertIn("[+2]", msg)
+        self.assertIn("- Paper A. [[PUB](https://doi.org/10.1/a)] [[CODE](https://github.com/u/r)]\\n", msg)
+        self.assertIn("- Paper B.\\n", msg)
 
 
 if __name__ == "__main__":

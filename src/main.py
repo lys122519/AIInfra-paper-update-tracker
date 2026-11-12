@@ -1,20 +1,18 @@
 from loguru import logger
 from fire import Fire
 from utils import (
-    get_msg, init, get_dblp_items, request_data,
+    get_msg, init,
     deduplicate_items_by_ee, deduplicate_items_by_title,
-    filter_items_by_year, get_topic_short_name,
+    get_topic_short_name,
     format_title_topics, fetch_abstract_for_papers,
     translate_abstracts_for_papers,
-    get_configured_topics,
+    get_configured_keywords, get_configured_topics,
 )
 from dblp_snapshot import load_snapshot_items_by_topic
-from paper_filters import paper_passes_filters
 import yaml
 import datetime
 import urllib.parse
 import os
-import re
 from pathlib import Path
 
 # 本地开发时从 .env 加载环境变量
@@ -34,19 +32,17 @@ class Scaffold:
         self,
         env: str = "dev",
         cfg: str = "./../config.yaml",
-        primary_only: bool = False,
         all_years: bool = False,
         keyword_limit: int = 0,
         query_limit: int = 0,
         max_results: int = 0,
         dry_run: bool = False,
         skip_enrichment: bool = False,
-        fail_on_request_error: bool = False,
     ):
         cfg = init(cfg_path=cfg)
 
         logger.info(
-            f"running with env: {env}, primary_only: {primary_only}, "
+            f"running with env: {env}, "
             f"all_years: {all_years}, dry_run: {dry_run}, "
             f"skip_enrichment: {skip_enrichment}, cfg: {cfg}"
         )
@@ -59,25 +55,9 @@ class Scaffold:
         # logger.info(f"dblp cache: {dblp_cache}")
         dblp_new_cache = {}
 
-        dblp_source = cfg["dblp"].get("source", "snapshot")
-        dblp_url = cfg["dblp"].get("url", "")
-        if max_results > 0:
-            dblp_url = re.sub(r"([?&]h=)\d+", rf"\g<1>{max_results}", dblp_url)
         # 兼容旧版单 keyword 字符串配置
-        keywords = cfg["dblp"].get("keywords")
-        if keywords is None:
-            keyword = cfg["dblp"].get("keyword")
-            if keyword is not None:
-                keywords = [keyword]
-            else:
-                keywords = []
-        elif isinstance(keywords, str):
-            keywords = [keywords]
-
-        keywords = [keyword.strip() for keyword in keywords if isinstance(keyword, str) and keyword.strip()]
+        keywords = get_configured_keywords(cfg)
         if not keywords:
-            if primary_only:
-                raise ValueError("Invalid configuration: `dblp.keywords` (or legacy `dblp.keyword`) must contain at least one non-empty keyword when `primary_only=True`.")
             raise ValueError("Invalid configuration: `dblp.keywords` (or legacy `dblp.keyword`) must contain at least one non-empty keyword.")
 
         queries = cfg["dblp"]["queries"]
@@ -90,7 +70,6 @@ class Scaffold:
         msg = ""
         flag = False
         active_topics = []  # 收集本次有新增论文的 topic 简称
-        active_queries = []  # primary_only 模式下收集主关键词命中的 query
 
         # 按 venue (name_topic) 收集新论文，用于合并生成消息
         topic_new_items = {}      # name_topic -> list of new items
@@ -99,31 +78,34 @@ class Scaffold:
 
         logger.info(f"keywords: {keywords}, queries: {queries}")
 
-        snapshot_items_by_topic = None
-        if dblp_source == "snapshot":
-            snapshot_cfg = cfg["dblp"].get("snapshot", {})
-            project_root = Path(__file__).resolve().parents[1]
-            snapshot_path = project_root / snapshot_cfg.get("path", ".cache/dblp/dblp.xml.gz")
-            dtd_path = project_root / snapshot_cfg.get("dtd_path", ".cache/dblp/dblp.dtd")
-            if not snapshot_path.exists() or not dtd_path.exists():
-                raise FileNotFoundError(
-                    "DBLP snapshot is missing. Run `python scripts/sync_dblp_snapshot.py` "
-                    "from the project root first."
-                )
-            current_year = datetime.datetime.now().year
-            snapshot_items_by_topic = load_snapshot_items_by_topic(
-                snapshot_path=snapshot_path,
-                dtd_path=dtd_path,
-                keywords=keywords,
-                queries=queries,
-                query_key_prefixes=dict(snapshot_cfg.get("query_key_prefixes", {})),
-                min_year=None if all_years else current_year - 3,
-                max_year=None if all_years else current_year + 1,
-                max_results=max_results,
-                filters=cfg["dblp"].get("filters", {}),
+        dblp_source = cfg["dblp"].get("source", "snapshot")
+        if dblp_source != "snapshot":
+            raise ValueError(
+                "Invalid `dblp.source`: only `snapshot` is supported "
+                "(the legacy `api` mode has been removed)"
             )
-        elif dblp_source != "api":
-            raise ValueError("Invalid `dblp.source`: expected `snapshot` or `api`")
+        snapshot_cfg = cfg["dblp"].get("snapshot", {})
+        project_root = Path(__file__).resolve().parents[1]
+        snapshot_path = project_root / snapshot_cfg.get("path", ".cache/dblp/dblp.xml.gz")
+        dtd_path = project_root / snapshot_cfg.get("dtd_path", ".cache/dblp/dblp.dtd")
+        if not snapshot_path.exists() or not dtd_path.exists():
+            raise FileNotFoundError(
+                "DBLP snapshot is missing. Run `python scripts/sync_dblp_snapshot.py` "
+                "from the project root first."
+            )
+        # 年份过滤在流式解析时完成：仅保留近三年及未来一年的论文（如 2026 年则保留 2023-2027）
+        current_year = datetime.datetime.now().year
+        snapshot_items_by_topic = load_snapshot_items_by_topic(
+            snapshot_path=snapshot_path,
+            dtd_path=dtd_path,
+            keywords=keywords,
+            queries=queries,
+            query_key_prefixes=dict(snapshot_cfg.get("query_key_prefixes", {})),
+            min_year=None if all_years else current_year - 3,
+            max_year=None if all_years else current_year + 1,
+            max_results=max_results,
+            filters=cfg["dblp"].get("filters", {}),
+        )
 
         # 全局去重集合：只读取当前配置对应的 topic。这样切换研究领域时可以保留
         # 旧缓存用于回退，同时避免旧领域论文阻止新领域中的同一篇论文被收录。
@@ -141,36 +123,13 @@ class Scaffold:
                 if title:
                     global_seen_title.add(title)
 
-        def _process_topic(keyword: str, query: str) -> int:
-            """处理单个 keyword + query 组合，返回新论文数量。"""
-            nonlocal flag, active_topics
+        def _process_topic(keyword: str, query: str) -> None:
+            """处理单个 keyword + query 组合。"""
+            nonlocal flag
             encoded_keyword = urllib.parse.quote(keyword, safe='')
             encoded_query = urllib.parse.quote(query, safe='')
             topic = f"{encoded_keyword}%20{encoded_query}"
-            if dblp_source == "snapshot":
-                items = list(snapshot_items_by_topic.get(topic, []))
-            else:
-                # Legacy compatibility mode for small API workloads.
-                dblp_data = request_data(dblp_url.format(topic))
-                if dblp_data is None:
-                    logger.error(f"dblp_data is None, topic: {topic}")
-                    if fail_on_request_error:
-                        raise RuntimeError(f"DBLP request failed for smoke-test topic: {topic}")
-                    return 0
-                items = get_dblp_items(dblp_data)
-                items = [
-                    item
-                    for item in items
-                    if paper_passes_filters(
-                        item.get("title", ""), keyword, cfg["dblp"].get("filters", {})
-                    )
-                ]
-            # logger.info(f"items: {items}")
-
-            # 按年份过滤，仅保留近三年及未来一年的论文（如 2026 年则保留 2023-2027）
-            if not all_years:
-                current_year = datetime.datetime.now().year
-                items = filter_items_by_year(items, current_year)
+            items = list(snapshot_items_by_topic.get(topic, []))
 
             # 对当前 topic 获取的论文列表先按 ee 去重，再按 title 去重
             items = deduplicate_items_by_ee(items)
@@ -247,24 +206,10 @@ class Scaffold:
                     active_topics.append(short_name)
             logger.info(f"topic_new_items: {topic_new_items}")
 
-            return len(new_items)
-
-        if primary_only:
-            # 阶段一：primary keyword 全量扫描所有 venues
-            primary_keyword = keywords[0] if keywords else ""
+        # 所有 keywords × queries 组合
+        for keyword in keywords:
             for query in queries:
-                new_count = _process_topic(primary_keyword, query)
-                if new_count > 0:
-                    active_queries.append(query)
-            # 阶段二：secondary keywords 仅扫描 active venues
-            for keyword in keywords[1:]:
-                for query in active_queries:
-                    _process_topic(keyword, query)
-        else:
-            # 全量模式：所有 keywords × queries
-            for keyword in keywords:
-                for query in queries:
-                    _process_topic(keyword, query)
+                _process_topic(keyword, query)
 
         # save cache unless this is a read-only smoke test
         if dry_run:

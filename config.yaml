@@ -1,7 +1,6 @@
 dblp:
   # Use DBLP's official monthly XML release instead of the interactive search API.
   source: snapshot
-  url: https://dblp.org/search/publ/api?q={}&format=json&h=1000
   snapshot:
     path: .cache/dblp/dblp.xml.gz
     dtd_path: .cache/dblp/dblp.dtd

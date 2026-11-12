@@ -62,8 +62,7 @@ cd src
 python main.py run --env=dev
 ```
 
-The first command downloads about 1 GiB once; later runs reuse the same monthly release. Normal runs stream the snapshot once and distribute records across every configured `keyword × venue` combination. The narrower `--primary_only` compatibility mode remains available for single-theme configurations, but is intentionally not used by the scheduled workflow because AI infrastructure contains several independent subfields.
-
+The first command downloads about 1 GiB once; later runs reuse the same monthly release. Normal runs stream the snapshot once and distribute records across every configured `keyword × venue` combination.
 For a safe connectivity check, open **Actions → Run DBLP Watch → Run workflow** and keep `smoke_test` enabled. It discovers the latest official release, performs a HEAD check, and runs the bundled parser tests. It does not download the large dump, update the cache, fetch abstracts, commit files, or create an Issue.
 
 This design follows DBLP's bulk-access guidance and does not automate or bypass its interactive verification challenge. The scheduled workflow updates the tracker on days 6 and 20 of each month; unchanged monthly snapshots are reused from the release-keyed cache.
@@ -123,8 +122,7 @@ cd src
 python main.py run --env=dev
 ```
 
-首次同步会下载约 1 GiB 的压缩快照，后续运行会复用同一个月度版本。程序只流式读取快照一次，再将论文分配到所有 `关键词 × venue` 组合。项目仍保留适用于单一主题的 `--primary_only` 兼容模式，但定时工作流不会启用它，避免遗漏 AI Infra 各并列方向的论文。
-
+首次同步会下载约 1 GiB 的压缩快照，后续运行会复用同一个月度版本。程序只流式读取快照一次，再将论文分配到所有 `关键词 × venue` 组合。
 如需安全测试 GitHub 网络连接，可打开 **Actions → Run DBLP Watch → Run workflow**，并保持 `smoke_test` 开启。该模式仅发现最新官方版本、执行 HEAD 校验并运行内置解析测试，不下载大型快照，不更新缓存、不抓取摘要、不提交文件，也不创建 Issue。
 
 该方案遵循 DBLP 对批量访问的建议，不会自动处理或绕过交互式验证挑战。定时工作流在每月 3 日和 17 日更新；若 DBLP 月度快照未变化，则复用按发布版本缓存的快照。

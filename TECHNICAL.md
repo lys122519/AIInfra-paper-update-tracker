@@ -44,12 +44,10 @@ In `dev` mode the script will:
 You can inspect `topic_new_items` and `msg` in the logs to preview the issue content.
 
 Additional CLI flags:
-- `--primary_only` — Compatibility mode for a single core research theme: the primary keyword scans all venues, then secondary keywords only scan venues where new papers were found. The AI Infra workflow does not use this mode because its keywords represent independent subfields.
 - `--all_years` — Disable the year filter and skip abstract fetching / translation. Useful for backfilling the entire history.
 - `--keyword_limit` / `--query_limit` / `--max_results` — Bound local snapshot processing to a small number of keywords, venues, and results per topic.
 - `--dry_run` — Process results without writing cache changes.
 - `--skip_enrichment` — Skip abstract retrieval and translation.
-- `--fail_on_request_error` — Legacy API-mode option that exits non-zero after a request failure.
 
 ---
 
@@ -66,7 +64,6 @@ dblp:
     query_key_prefixes:
       "venue:MLSys:": conf/mlsys
       "streamid:conf/sc:": conf/sc
-  url: https://dblp.org/search/publ/api?q={}&format=json&h=1000
   keywords:
     - AI infrastructure
     - distributed training
@@ -95,11 +92,10 @@ dblp:
 
 | Field | Description |
 |-------|-------------|
-| `dblp.source` | `snapshot` (default) reads the official monthly dump. `api` remains as a legacy compatibility mode for small workloads. |
+| `dblp.source` | Must be `snapshot` (default): reads the official monthly dump. The legacy search-API mode has been removed. |
 | `dblp.snapshot.path` / `dtd_path` | Local files created by `scripts/sync_dblp_snapshot.py`; both live under the ignored `.cache/` directory. |
 | `dblp.snapshot.query_key_prefixes` | Maps each configured query label to a stable DBLP record-key prefix, such as `venue:MLSys:` → `conf/mlsys`. |
-| `dblp.url` | Legacy search API endpoint; used only when `dblp.source: api`. |
-| `dblp.keywords` | List of independent title-search expressions for AI infrastructure. Normal and scheduled runs scan all keyword/venue combinations. The first item only has special meaning when `--primary_only` is explicitly enabled. |
+| `dblp.keywords` | List of independent title-search expressions for AI infrastructure. Every run scans all keyword/venue combinations. |
 | `dblp.filters.exclude_title_keywords` | Case-insensitive title expressions that are always rejected. Tokens use prefix matching, so stems such as `federat` are supported. |
 | `dblp.filters.require_any_by_keyword` | Optional positive context rules for broad keywords. A matching paper must contain at least one listed expression in its title. |
 | `dblp.queries` | List of plain-text venue labels. The runner combines them with keywords only to preserve the existing encoded cache keys and display links. |
@@ -136,11 +132,10 @@ This repository uses [GitHub Actions](.github/workflows/watch.yml) to run the tr
 5. **Restore / Download Snapshot** – Reuses an Actions cache keyed by the exact release date, or downloads the gzip dump, verifies its publisher MD5, and downloads the official DTD.
 6. **Run Tracker** – Streams the XML once, filters records by key prefix, year, title keywords, exclusions, and required infrastructure context, then deduplicates and updates `cached/dblp.yaml`.
    - A manual run with `smoke_test=true` stops after release discovery and bundled parser tests. All large downloads, mutations, and notifications are skipped.
-7. **Extract Related Code** (optional) – Runs `scripts/fetch_related_code.py` to scan abstracts for GitHub repository links and backfill `related_code` fields.
-8. **Fetch Missing Abstracts** (optional) – Runs `scripts/fetch_abstracts.py` to backfill empty `abstract` fields and their Chinese translations for existing papers.
-   Both backfill steps ignore inactive legacy cache topics and only process the current configuration.
-9. **Update AIInfra-Papers.md** – Runs `scripts/convert_cache_to_md.py` to regenerate the categorized Markdown paper list from the updated cache.
-10. **Push / Create Issue** – Commits generated data and opens an Issue when new papers exist.
+7. **Fetch Missing Abstracts** (optional) – Runs `scripts/fetch_abstracts.py` to retry empty `abstract` fields for existing papers, extracting `related_code` GitHub links and Chinese translations along the way.
+   This step ignores inactive legacy cache topics and only processes the current configuration.
+8. **Update AIInfra-Papers.md** – Runs `scripts/convert_cache_to_md.py` to regenerate the categorized Markdown paper list from the updated cache.
+9. **Push / Create Issue** – Commits generated data and opens an Issue when new papers exist.
 
 ### Issue Format
 
@@ -173,14 +168,13 @@ The issue body contains:
 │   ├── export_candidates.py   # Exports review batches for Awesome-AIInfra
 │   ├── fetch_abstracts.py     # Backfill/refresh paper abstracts
 │   ├── fetch_dois.py          # Backfill missing DOIs
-│   ├── fetch_related_code.py  # Backfill GitHub links from abstracts
-│   ├── sync_dblp_snapshot.py  # Discover/download/check official DBLP dump
-│   ├── dedup_cache_by_title.py# One-off deduplication by title
-│   └── dedup_cache_global.py  # One-off global cross-topic deduplication
+│   ├── filter_cache.py        # Apply current title filters to the cache
+│   └── sync_dblp_snapshot.py  # Discover/download/check official DBLP dump
 ├── src/
 │   ├── main.py                # Entry point and orchestration
 │   ├── dblp_snapshot.py       # DROPS sync metadata and streaming XML parser
-│   └── utils.py               # API calls, parsing, formatting, dedup logic
+│   ├── paper_filters.py       # Title exclusions and context rules
+│   └── utils.py               # Metadata API calls, formatting, dedup logic
 ├── config.yaml                # Venue list and settings
 ├── AIInfra-Papers.md          # Structured Markdown output of tracked papers
 ├── requirements.txt           # Python dependencies
@@ -194,7 +188,7 @@ The issue body contains:
 - **`src/main.py`** – Loads cache and one locally parsed snapshot result, then performs three-stage deduplication, enrichment, notification formatting, and cache updates.
 - **`src/dblp_snapshot.py`** – Discovers official DROPS releases, verifies downloads, and stream-parses gzip XML with its local DTD while keeping memory bounded.
 - **`src/paper_filters.py`** – Applies configurable global title exclusions and per-keyword infrastructure-context requirements.
-- **`src/utils.py`** – Contains `get_dblp_items` (JSON parsing), `deduplicate_items_by_ee` / `deduplicate_items_by_title` (two-stage dedup logic), `filter_items_by_year` (year window filter), `get_msg` (Markdown formatting), `fetch_abstract_for_papers` (abstract retrieval from Crossref / Semantic Scholar / arXiv / OpenAlex), `translate_abstracts_for_papers` (Chinese translation via Qwen-MT-plus), `extract_github_links` (code link extraction), `fetch_doi_for_papers` (DOI backfill), and helpers for topic short-name extraction.
+- **`src/utils.py`** – Contains `deduplicate_items_by_ee` / `deduplicate_items_by_title` (two-stage dedup logic), `get_configured_keywords` / `get_configured_topics` (config parsing), `get_msg` (Markdown formatting), `fetch_abstract_for_papers` (abstract retrieval from Crossref / Semantic Scholar / arXiv / OpenAlex), `translate_abstracts_for_papers` (Chinese translation via Qwen-MT-plus), `extract_github_links` (code link extraction), `fetch_doi_for_papers` (DOI backfill), and helpers for topic short-name extraction.
 - **`cached/dblp.yaml`** – YAML mapping of topic → list of paper dicts. Legacy topics may remain in this file after a domain switch, but only topics generated by the current configuration participate in deduplication and Markdown output.
 - **`scripts/convert_cache_to_md.py`** – Regenerates `AIInfra-Papers.md` from the cache using domain-specific venue and category maps.
 - **`scripts/curation.py`** – Normalizes venue variants, explicitly excludes secondary tracks, and assigns initial curation categories.
@@ -202,8 +196,6 @@ The issue body contains:
 - **`scripts/filter_cache.py`** – Applies the current title filters to existing cache entries. Use `--dry-run` to preview removals.
 - **`scripts/fetch_abstracts.py`** – Standalone script to backfill `abstract` fields for existing papers. Supports `--year all` and `--retry-failed`.
 - **`scripts/fetch_dois.py`** – Standalone script to backfill missing `doi` fields. Supports `--year all` and `--retry-all`.
-- **`scripts/fetch_related_code.py`** – Standalone script to backfill `related_code` fields by scanning abstracts for GitHub links. Supports `--year all` and `--retry-failed`.
-- **`scripts/dedup_cache_by_title.py`** & **`scripts/dedup_cache_global.py`** – One-off maintenance scripts for cache deduplication.
 
 ---
 
@@ -250,17 +242,6 @@ python scripts/fetch_dois.py --year all
 python scripts/fetch_dois.py --retry-all
 ```
 
-### Backfill Related Code Links
-
-```bash
-# Process current-year papers
-python scripts/fetch_related_code.py
-# Process all years
-python scripts/fetch_related_code.py --year all
-# Retry previously failed entries
-python scripts/fetch_related_code.py --retry-failed
-```
-
 ### Switch to a Different Research Domain
 
 1. Edit `config.yaml` → `dblp.keywords`.
@@ -286,11 +267,11 @@ Edit `src/utils.py` → `get_msg`. The function is called from `src/main.py` aft
 
 ### Change the Year Window
 
-Edit `src/utils.py` → `filter_items_by_year`:
+Edit `src/main.py`, where the window is passed to the snapshot parser:
 
 ```python
-min_year = current_year - 3
-max_year = current_year + 1
+min_year=None if all_years else current_year - 3,
+max_year=None if all_years else current_year + 1,
 ```
 
 Adjust the offsets as needed.

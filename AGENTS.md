@@ -44,14 +44,12 @@
 │   ├── fetch_abstracts.py           # Backfill/refresh paper abstracts via external APIs
 │   ├── fetch_dois.py                # Backfill missing DOIs via DBLP / Crossref / Semantic Scholar
 │   ├── sync_dblp_snapshot.py        # Discover, verify, and download official XML releases
-│   ├── dedup_cache_by_title.py      # Deduplicate cache entries by title
-│   ├── dedup_cache_global.py        # Global cross-topic deduplication for the cache
 │   └── filter_cache.py              # Apply current title filters to existing cache data
 ├── src/
 │   ├── main.py                      # Entry point: consumes local topic results and updates the cache
 │   ├── dblp_snapshot.py             # DROPS release sync and streaming local XML filtering
 │   ├── paper_filters.py             # Configurable title exclusions and context rules
-│   └── utils.py                     # Helper functions: API call, parsing, formatting, dedup
+│   └── utils.py                     # Helper functions: metadata APIs, formatting, dedup
 ├── config.yaml                      # keyword, plain queries (venues), and mail targets
 ├── AIInfra-Papers.md                # Structured Markdown output of all tracked papers
 ├── requirements.txt                 # Python dependencies
@@ -63,7 +61,7 @@
 ## Key Logic & Conventions
 
 ### 1. Year Filtering
-- Location: `src/main.py` (calls `filter_items_by_year` in `src/utils.py`)
+- Location: `src/main.py` passes `min_year` / `max_year` to `load_snapshot_items_by_topic` in `src/dblp_snapshot.py`, which drops out-of-window records while streaming. `--all_years` passes `None` for both.
 - Rule: Only papers whose `year` falls in `[current_year - 3, current_year + 1]` are kept.
 - Example: In 2026, valid years are 2023–2027.
 - **Agent Note**: If you change this window, update both the implementation **and** this document.
@@ -110,7 +108,6 @@ dblp:
     dtd_path: .cache/dblp/dblp.dtd
     query_key_prefixes:
       "venue:MLSys:": conf/mlsys
-  url: https://dblp.org/search/publ/api?q={}&format=json&h=1000
   keywords:
     - AI infrastructure
     - distributed training
@@ -124,9 +121,8 @@ dblp:
   mails:
     - "im.young@foxmail.com"
 ```
-- `keywords`: Independent AI-Infra title-search expressions. Automatic and normal manual runs scan all `keywords × queries` combinations because the topics are complementary.
-  - The optional `primary_only=True` compatibility mode is only appropriate when the remaining keywords are aliases of one primary theme. Do not enable it for the current multi-theme configuration.
-- `source`: `snapshot` is the normal mode. `api` is retained only for legacy or small-workload compatibility.
+- `keywords`: Independent AI-Infra title-search expressions. Every run scans all `keywords × queries` combinations because the topics are complementary. `utils.get_configured_keywords()` is the single parser for this field (shared by `main.py` and `get_configured_topics()`).
+- `source`: Must be `snapshot` (the default). The legacy DBLP search-API mode has been removed; any other value raises an error.
 - `snapshot.query_key_prefixes`: Every configured query must map to a stable XML record-key prefix. Local filtering uses this mapping instead of sending venue searches to DBLP.
 - `queries`: List of plain-text venue labels. They are still URL-encoded with the keyword to preserve cache-key and Issue-link compatibility.
 - `mails`: The first email address (`mails[0]`) is used as the `contact_email` for the Crossref API User-Agent (`mailto:...`), which is recommended for polite API access. Additional addresses are reserved for future mail-notification features.
@@ -136,7 +132,7 @@ dblp:
 ### 7. Relevance Filtering
 - `dblp.filters.exclude_title_keywords` contains global, case-insensitive title exclusions. Expression tokens match consecutive title-token prefixes, allowing stems such as `federat`.
 - `dblp.filters.require_any_by_keyword` maps broad search keywords to positive systems/efficiency context expressions. At least one expression must be present in the title.
-- Both snapshot and legacy API modes apply the same rules before caching or enrichment.
+- The snapshot parser applies these rules before caching or enrichment.
 - After changing filter rules, run `python scripts/filter_cache.py --dry-run`, then `python scripts/filter_cache.py` and `python scripts/convert_cache_to_md.py` to update existing data.
 - **Agent Note**: Prefer positive context rules for broad keywords over long lists of application-domain exclusions. Add tests for every new filtering behavior.
 
@@ -197,21 +193,6 @@ dblp:
   ```
 - A GitHub Actions workflow `.github/workflows/backfill-dois.yml` allows manual triggering from the repository UI.
 
-### Backfilling Related Code for Existing Papers
-- A standalone script `scripts/fetch_related_code.py` is provided to backfill missing `related_code` fields for papers already in `cached/dblp.yaml`.
-- It scans the `abstract` text of each paper for GitHub repository URLs (`https://github.com/<user>/<repo>`), cleans trailing punctuation, and stores the first match in `related_code`.
-- The cache is backed up to `cached/dblp.yaml.bak` before each overwrite; `*.bak` files are ignored by git (see `.gitignore`).
-- Usage:
-  ```bash
-  # Process current-year papers (default)
-  python scripts/fetch_related_code.py
-  # Process all years
-  python scripts/fetch_related_code.py --year all
-  # Retry previously failed entries (empty related_code)
-  python scripts/fetch_related_code.py --retry-failed
-  ```
-- **Automatic related code extraction**: `src/main.py` already calls `extract_github_links()` inside `fetch_abstract_for_papers()` for every batch of new papers, so newly discovered papers get their code links filled automatically during the daily GitHub Actions run.
-
 ### Switching to a Different Research Domain
 The tracker remains domain-agnostic. To pivot away from the current AI Infrastructure focus:
 
@@ -229,12 +210,12 @@ The tracker remains domain-agnostic. To pivot away from the current AI Infrastru
 4. (Optional) Remove inactive keys from `cached/dblp.yaml` to reclaim space. A reset is not needed for correctness because deduplication and Markdown generation ignore topics not present in the current configuration.
 5. (Optional) Update `README.md` and `TECHNICAL.md` to reflect the new domain.
 
-No changes to `src/main.py` or the GitHub Actions workflow are required. Review `primary_only` carefully before enabling it.
+No changes to `src/main.py` or the GitHub Actions workflow are required.
 
 ### Changing Message Format
 - Edit `src/utils.py` → `get_msg`.
 - If you modify the Markdown structure, verify that the issue template renders correctly in GitHub.
-- Keep the `aggregated` parameter behavior: `True` = heading only, `False` = heading + list.
+- Keep the literal `\\n` escapes in `get_msg`: the message is written to `GITHUB_ENV` as `MSG=$'...'`, which expands them.
 - The default list item format is `- {title}. [[PUB]({ee})]`. When `related_code` is present, it appends ` [[CODE]({related_code})]` after `[PUB]`.
 
 ### Changing Issue Template
@@ -269,18 +250,16 @@ In `dev` mode the script will:
 - Print logs to stdout
 - **Not** write to `GITHUB_ENV`
 
-You can inspect `aggregated_msg` and `msg` in the logs to preview the issue content.
+You can inspect `topic_new_items` in the logs to preview the issue content.
 
 Additional CLI flags:
-- `--primary_only` — Optional compatibility mode: the first keyword scans all venues and the remaining keywords only scan venues where it found new papers. It is not used by the current automatic workflow.
 - `--all_years` — Disables the year filter and skips abstract fetching / translation (used by the `Fetch All Years Papers` workflow).
 - `--keyword_limit`, `--query_limit`, and `--max_results` — Bound local processing scope.
 - `--dry_run` and `--skip_enrichment` — Keep smoke tests read-only and avoid external metadata calls.
-- `--fail_on_request_error` — Legacy API-mode option that turns request failures into a non-zero exit.
 
 ## Common Pitfalls
 
-1. **Snapshot Size**: The official gzip release is about 1 GiB. Keep it under `.cache/dblp/`, never commit it, stream the XML, and retain the release-keyed Actions cache. Do not add challenge-solving or verification-bypass code; `source: api` remains only a legacy compatibility path.
+1. **Snapshot Size**: The official gzip release is about 1 GiB. Keep it under `.cache/dblp/`, never commit it, stream the XML, and retain the release-keyed Actions cache. Do not add challenge-solving or verification-bypass code, and do not reintroduce bulk queries against the DBLP search API.
 2. **YAML Encoding**: `cached/dblp.yaml` is written with `allow_unicode=True`. Editing it manually with an editor that strips Unicode may corrupt author names.
 3. **Empty `ee` Field**: Some older DBLP entries lack an `ee`. The deduplication logic skips empty `ee` values, so those papers are always retained. This is intentional to avoid data loss.
 4. **Topic String Parsing**: `get_topic_short_name` relies on `split(":")[-2]` followed by `split("/")[-1]`. If DBLP changes its topic URL format, this will break.

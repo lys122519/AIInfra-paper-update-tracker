@@ -12,16 +12,16 @@ import re
 import difflib
 
 
-DBLP_SEARCH_RETRY_BASE_SECONDS = 4.0
-DBLP_SEARCH_RETRY_CAP_SECONDS = 120.0
-DBLP_SEARCH_JITTER_MIN_SECONDS = 0.5
-DBLP_SEARCH_JITTER_MAX_SECONDS = 2.5
 DOI_PATTERN = re.compile(r"^10\.[0-9.]+/[^\s]+$")
 DOI_TRAILING_PUNCTUATION = ".,;:)]}>\"'"
 
 
-def get_configured_topics(config):
-    """Return encoded DBLP topic keys for the active keywords and queries."""
+def get_configured_keywords(config):
+    """Return the non-empty, stripped keyword list from ``config["dblp"]``.
+
+    Supports the legacy single-string ``keyword`` field and a plain string
+    ``keywords`` value, both of which are wrapped into a one-element list.
+    """
     dblp_cfg = config.get("dblp", {}) if isinstance(config, dict) else {}
     keywords = dblp_cfg.get("keywords")
     if keywords is None:
@@ -31,12 +31,17 @@ def get_configured_topics(config):
         keywords = [keywords]
     elif not isinstance(keywords, list):
         keywords = []
+    return [value.strip() for value in keywords if isinstance(value, str) and value.strip()]
+
+
+def get_configured_topics(config):
+    """Return encoded DBLP topic keys for the active keywords and queries."""
+    dblp_cfg = config.get("dblp", {}) if isinstance(config, dict) else {}
+    keywords = get_configured_keywords(config)
 
     queries = dblp_cfg.get("queries", [])
     if not isinstance(queries, list):
         queries = []
-
-    keywords = [value.strip() for value in keywords if isinstance(value, str) and value.strip()]
     queries = [value.strip() for value in queries if isinstance(value, str) and value.strip()]
     return {
         f"{urllib.parse.quote(keyword, safe='')}%20{urllib.parse.quote(query, safe='')}"
@@ -82,32 +87,6 @@ def init(cfg_path: str):
     return cfg
 
 
-def get_item_info(item, key):
-    try:
-        return item[key]
-    except KeyError:
-        return ""
-
-
-def filter_items_by_year(items, current_year):
-    """按年份过滤论文列表，只保留近三年及未来一年的数据"""
-    min_year = current_year - 3
-    max_year = current_year + 1
-    filtered = []
-    for item in items:
-        year_str = item.get("year", "")
-        if not year_str:
-            continue
-        try:
-            year = int(year_str)
-        except ValueError:
-            continue
-        # 仅保留在 [current_year-3, current_year+1] 范围内的论文
-        if min_year <= year <= max_year:
-            filtered.append(item)
-    return filtered
-
-
 def deduplicate_items_by_ee(items):
     """根据 ee 字段对论文列表进行去重，保留第一条记录"""
     seen_ee = set()
@@ -136,53 +115,6 @@ def deduplicate_items_by_title(items):
             seen_title.add(title)
         res.append(item)
     return res
-
-
-def get_dblp_items(dblp_data):
-    try:
-        items = dblp_data["result"]["hits"]["hit"]
-    except KeyError:
-        items = []
-
-    # item{'author', 'title', 'venue', 'year', 'type', 'access', 'key', 'doi', 'ee', 'url'}
-    res_items = []
-
-    for item in items:
-        res_item = {}
-        # format author
-        authors = get_item_info(item["info"], "authors")
-        try:
-            authors = [author["text"] for author in authors["author"]]
-        except TypeError:
-            if "author" not in authors:
-                continue
-            if "text" not in authors["author"]:
-                continue
-
-            authors = [authors["author"]["text"]]
-
-        # logger.info(f"authors: {authors}")
-
-        res_item["author"] = ", ".join(authors)
-        needed_keys = [
-            "title",
-            "venue",
-            "year",
-            "type",
-            "access",
-            "key",
-            "doi",
-            "ee",
-            "url",
-            "abstract",
-        ]
-        for key in needed_keys:
-            key_temp = get_item_info(item["info"], key)
-            res_item[key] = key_temp if key_temp else ""
-
-        res_items.append(res_item)
-
-    return res_items
 
 
 def get_topic_short_name(topic):
@@ -229,7 +161,7 @@ def extract_github_links(text: str) -> str:
     return url
 
 
-def get_msg(items, topic, aggregated=False):
+def get_msg(items, topic):
     # 将 URL 编码的 topic 转回可读字符串
     string_topic = urllib.parse.unquote(topic)
     # 提取 topic 名称（取倒数第二个冒号分隔的部分）
@@ -238,20 +170,18 @@ def get_msg(items, topic, aggregated=False):
     # 输出 topic 名称及新增条目数，如 "TopicName [+5]"
     msg = f"## [{name_topic}](https://dblp.org/search?q={topic}) [+{len(items)}]\\n\\n"
 
-    # 仅在非聚合模式下输出无序列表详情
-    if aggregated == False:
-        for item in items:
-            ee = item.get("ee", "").strip()
-            related_code = item.get("related_code", "").strip()
-            if ee:
-                # 格式：- title. [PUB](ee超链接)  [CODE](github超链接)
-                if related_code:
-                    msg += f"- {item['title']}. [[PUB]({ee})] [[CODE]({related_code})]\\n"
-                else:
-                    msg += f"- {item['title']}. [[PUB]({ee})]\\n"
+    for item in items:
+        ee = item.get("ee", "").strip()
+        related_code = item.get("related_code", "").strip()
+        if ee:
+            # 格式：- title. [PUB](ee超链接)  [CODE](github超链接)
+            if related_code:
+                msg += f"- {item['title']}. [[PUB]({ee})] [[CODE]({related_code})]\\n"
             else:
-                msg += f"- {item['title']}.\\n"
-        msg += "\\n"
+                msg += f"- {item['title']}. [[PUB]({ee})]\\n"
+        else:
+            msg += f"- {item['title']}.\\n"
+    msg += "\\n"
 
     msg = msg.replace("'", "")
     return msg
@@ -292,55 +222,6 @@ def _sleep_for_retry(source: str, attempt: int, response=None, base: float = 2.5
     time.sleep(wait)
     return wait
 
-
-def request_data(url, retry=10, sleep_time=6.0, timeout=15):
-    """请求 DBLP 数据，带限速与更严格退避重试。
-
-    Args:
-        url: DBLP 请求 URL。
-        retry: 失败后的额外重试次数（总尝试次数 = retry + 1）。
-        sleep_time: 每次请求前的基础等待秒数（会叠加随机抖动）。
-        timeout: 单次请求超时时间（秒）。
-    """
-    max_attempts = retry + 1
-    for attempt in range(1, max_attempts + 1):
-        try:
-            # DBLP 主流程查询：基础间隔 + 轻微抖动，降低突发请求概率
-            time.sleep(sleep_time + random.uniform(DBLP_SEARCH_JITTER_MIN_SECONDS, DBLP_SEARCH_JITTER_MAX_SECONDS))
-            response = requests.get(url, timeout=timeout)
-            if response.status_code == 429:
-                _sleep_for_retry(
-                    "DBLP search API rate limited",
-                    attempt,
-                    response=response,
-                    base=DBLP_SEARCH_RETRY_BASE_SECONDS,
-                    cap=DBLP_SEARCH_RETRY_CAP_SECONDS,
-                )
-                continue
-            response.raise_for_status()
-            content_type = (response.headers.get("Content-Type") or "").lower()
-            if "text/html" in content_type:
-                body_preview = response.text[:300].lower()
-                if "not a bot" in body_preview or "<!doctype html" in body_preview:
-                    logger.error(
-                        "DBLP returned an HTML verification page instead of JSON; "
-                        "automated API access is blocked from this network."
-                    )
-                    return None
-            return response.json()
-        except Exception as e:
-            logger.error(f"Exception: {e}")
-            if attempt < max_attempts:
-                logger.info(f"retrying {url}")
-                _sleep_for_retry(
-                    "DBLP search API failure",
-                    attempt,
-                    base=DBLP_SEARCH_RETRY_BASE_SECONDS,
-                    cap=DBLP_SEARCH_RETRY_CAP_SECONDS,
-                )
-                continue
-            logger.error(f"Failed to request {url}")
-            return None
 
 def _rate_limited_request(url, last_request_time, min_interval=1.0, timeout=10, jitter=0.2, **kwargs):
     """发送限速 HTTP 请求，确保两次请求间隔至少 min_interval 秒。
